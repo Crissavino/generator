@@ -1,7 +1,7 @@
 {
-  "name": "hashlips_art_engine",
-  "version": "1.1.1",
-  "description": "HashLips Art Engine is a tool used to create multiple different instances of artworks based on provided layers.",
+  "name": "nft-generator",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "bin": "index.js",
   "pkg": {
@@ -12,6 +12,7 @@
     ]
   },
   "scripts": {
+    "dev": "nodemon src/frontend/",
     "build": "node index.js",
     "generate": "node index.js",
     "rarity": "node utils/rarity.js",
@@ -21,11 +22,26 @@
     "preview_gif": "node utils/preview_gif.js",
     "generate_metadata": "node utils/generate_metadata.js"
   },
-  "author": "Daniel Eugene Botha (HashLips)",
+  "author": "Cristian Savino",
   "license": "MIT",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "canvas": "^2.8.0",
+    "connect-flash": "^0.1.1",
+    "express": "^4.17.2",
+    "express-handlebars": "^6.0.2",
+    "express-mysql-session": "^2.1.7",
+    "express-session": "^1.17.2",
+    "express-validator": "^6.14.0",
     "gif-encoder-2": "^1.0.5",
-    "sha1": "^1.1.1"
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "passport": "^0.5.2",
+    "passport-local": "^1.0.0",
+    "sha1": "^1.1.1",
+    "timeago.js": "^4.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }
