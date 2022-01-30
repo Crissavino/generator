@@ -21,7 +21,7 @@ app.set('view engine', '.hbs');
 // middlewares
 app.use(morgan('dev'));
 // para no enviar ni recibir imagenes
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 // para no enviar ni recibir imagenes
 app.use(express.json());
 

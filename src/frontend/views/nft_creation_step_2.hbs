@@ -1,0 +1,55 @@
+<!-- ========================= hero-section start ========================= -->
+<section id="home" class="hero-section">
+    <div class="hero-content-wrapper">
+        <h3 class="text-white wow fadeInDown text-center" data-wow-delay=".1s">This is your layer folder</h3>
+        <p class="wow fadeInLeft" data-wow-delay=".1s">
+            If you edit your layers you need to re-upload the folder for the changes to take place
+        </p>
+        <a class="custom-link" onclick="openChangeFolderBrowser()" id="changeFolderLink" data-wow-delay=".1s">
+            Change folder
+        </a>
+        <input type="file" name="folder" id="folder" onchange="folderChanged(this)" class="d-none" data-multiple-caption="{count} files selected" webkitdirectory multiple />
+    </div>
+    <div class="shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    <span class="wow fadeInLeft folder" data-wow-delay=".1s"></span>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+</section>
+<!-- ========================= hero-section end ========================= -->
+
+<script>
+    console.log('asdasd')
+    function openFolderBrowser() {
+        const folder = document.getElementById('folder');
+        folder.click();
+    }
+
+    function folderUploaded(input) {
+        console.log(input.files)
+        console.log(input.files[0].name)
+        console.log(input.files[0].size)
+        console.log(input.files[0].webkitRelativePath)
+
+    }
+
+</script>
