@@ -45,7 +45,7 @@
             let folderStructure = file.webkitRelativePath.split('/');
             folderStructure.shift();
             folderStructure = folderStructure.join('/');
-            formData.append(`layersFolder2-${userUuid}`, file);
+            formData.append(`layersFolder-${userUuid}`, file);
         }
         formData.append(`userUuid`, userUuid);
 
