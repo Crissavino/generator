@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const morgan = require('morgan');
 const exphbs = require('express-handlebars');
 const path = require('path');
@@ -19,6 +20,7 @@ app.engine('.hbs', exphbs.engine({
 app.set('view engine', '.hbs');
 
 // middlewares
+app.use(session({secret: 'secret!!',saveUninitialized: true, resave: true}));
 app.use(morgan('dev'));
 // para no enviar ni recibir imagenes
 app.use(express.urlencoded({ extended: true }));

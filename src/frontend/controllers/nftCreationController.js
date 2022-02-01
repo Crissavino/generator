@@ -11,7 +11,6 @@ const storageForLayersFolder = multer.diskStorage({
         }
         let userUuid = splittedFieldName[1]
         let folderStructure = file.originalname.split('/');
-        folderStructure.shift();
         folderStructure.pop();
         folderStructure = folderStructure.join('/');
 
@@ -79,6 +78,10 @@ const postLayersFolder = async (req, res = response) => {
                     message: "File type not allowed",
                 });
             }
+
+            let session = req.session;
+            session.userUuid = req.body.userUuid;
+
             res.status(200).json({
                 success: true,
                 message: "All files uploaded",
@@ -94,11 +97,75 @@ const postLayersFolder = async (req, res = response) => {
     }
 }
 
+function getUserUploadedFolder(userUuid, mainFolderName) {
+    let layers = []
+    fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}`).forEach(folder => {
+        layers.push(folder)
+    })
+
+    return layers
+}
+
 const seeSecondStep = async (req, res = response) => {
     const body = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    if (!userUuid) {
+        return res.redirect('/nft-creation/first-step')
+    }
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    let layers = getUserUploadedFolder(userUuid, mainFolderName);
     try {
         res.render("nft_creation_step_2", {
             pageTitle: "Second Step",
+            mainFolderName,
+            layers,
+            saveSecondStepUrl: '/nft-creation/save-second-step'
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+
+}
+
+const saveSecondStep = async (req, res = response) => {
+    const body = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    try {
+        // TODO save data in DB
+        res.redirect(`/nft-creation/third-step`)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+
+}
+
+const seeThirdStep = async (req, res = response) => {
+    const body = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    if (!userUuid) {
+        return res.redirect('/nft-creation/first-step')
+    }
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    try {
+        res.render("nft_creation_step_3", {
+            pageTitle: "Fourth Step",
+            mainFolderName,
+            layers,
+            saveThirdStepUrl: '/nft-creation/save-third-step'
         });
     } catch (error) {
         console.error(error);
@@ -113,5 +180,7 @@ const seeSecondStep = async (req, res = response) => {
 module.exports = {
     seeFirstStep,
     postLayersFolder,
-    seeSecondStep
+    seeSecondStep,
+    saveSecondStep,
+    seeThirdStep
 };

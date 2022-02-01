@@ -3,7 +3,9 @@ const router = express.Router();
 const {
     seeFirstStep,
     postLayersFolder,
-    seeSecondStep
+    seeSecondStep,
+    saveSecondStep,
+    seeThirdStep,
 } = require('../controllers/nftCreationController');
 
 
@@ -20,6 +22,16 @@ router.post(
 router.get(
     '/nft-creation/second-step',
     seeSecondStep
+);
+
+router.post(
+    '/nft-creation/save-second-step',
+    saveSecondStep
+);
+
+router.get(
+    '/nft-creation/third-step',
+    seeThirdStep
 );
 
 module.exports = router;
