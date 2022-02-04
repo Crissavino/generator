@@ -7,57 +7,92 @@
     </div>
     <div class="hero-content-wrapper">
         <div class="col-8 mx-auto big-white-modal">
-            <h3 class="wow fadeInLeft text-center" data-wow-delay=".1s">This is your layer folder</h3>
-            <p class="mx-auto wow fadeInLeft text-center w-50" data-wow-delay=".1s">
-                If you edit your layers you need to re-upload the folder for the changes to take place
-            </p>
-            <form action="{{ saveThirdStepUrl }}" method="post">
-                <div class="d-flex flex-column justify-content-center align-items-center">
-                    <span class="wow fadeInLeft folder" onclick="openFolderBrowser()" data-wow-delay=".1s"></span> <br>
-                    <a class="custom-link wow fadeInLeft" onclick="openChangeFolderBrowser()" id="changeFolderLink" data-wow-delay=".1s">
-                        Change folder
-                    </a>
-                    <input type="file" name="folder" id="folder" onchange="folderChanged(this)" class="d-none" data-multiple-caption="{count} files selected" webkitdirectory multiple />
-                </div>
-
+            <form id="thirdStepForm" action="{{ saveThirdStepUrl }}" method="post">
                 <div class="col-6 mt-5 mx-auto text-center">
-                    <label for="projectName">What’s the name of this project?</label>
+                    <label for="eachImageName">How should each image be named in the metadata?</label>
+                    <span id="eachImageNameText" class="text-muted">NAME #ID</span>
                     <div class="mx-auto mt-3 col-8">
-                        <input id="projectName" type="text" class="form-control" name="projectName">
+                        <input id="eachImageName" type="text" class="form-control" oninput="changeEachImageName(this)" name="eachImageName">
                     </div>
                 </div>
 
                 <div class="col-6 mt-5 mx-auto text-center">
-                    <label for="imagesToGenerate">How many images do you want to generate in total?</label>
-                    <div class="mx-auto mt-3 col-4">
-                        <input id="imagesToGenerate" type="number" min="10" max="10000" class="form-control col-4" name="imagesToGenerate">
-                    </div>
-                </div>
-
-                <div class="col-6 mt-5 mx-auto text-center">
-                    <label for="projectName">Which blockchain are you using?</label>
-                    <span class="text-muted">
-                        We currently support metadata generation for Ethereum and Solana NFTs.
-                        If you plan to use a different blockchain, you can still use this tool to generate your images but the metadata will not be usable.
+                    <label for="collectionDescription">What is the description of your collection?</label>
+                    <span id="eachImageNameText" class="text-muted">
+                        The description will be the same for each image in the collection.
                     </span>
-                    <div class="mt-3 d-flex justify-content-center align-items-center">
-                        <div class="btn-blockchain-toggle">
-                            <div class="btn-blockchain-toggle-container" style="grid-template-columns: repeat(2, minmax(0px, 1fr));">
-                                <div class="btn-blockchain-selection" style="width: calc(50% - 14px); left: calc(21px + (50% - 14px) * 1);"></div>
-                                <button onclick="changeBlockchain(this, 'ethBlockchain')" id="solBlockchain" class="btn-blockchain-plain" style="background-color: transparent;">
-                                    <div class="blockchainText">Solana</div>
-                                </button>
-                                <button onclick="changeBlockchain(this, 'solBlockchain')" id="ethBlockchain" class="btn-blockchain-plain selected" style="background-color: transparent;">
-                                    <div class="blockchainText text-white">Ethereum</div>
-                                </button>
+                    <div class="mx-auto mt-3">
+                        <textarea name="collectionDescription" class="form-control" id="collectionDescription" cols="30" rows="5"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-6 mt-5 mx-auto text-center">
+                    <label for="collectionName">What is the name of this collection?</label>
+                    <div class="mx-auto mt-3 col-8">
+                        <input id="collectionName" type="text" class="form-control" name="collectionName">
+                    </div>
+                </div>
+
+                <div class="col-6 mt-5 mx-auto text-center">
+                    <label for="collectionFamily">What is the family of this collection?</label>
+                    <div class="mx-auto mt-3 col-8">
+                        <input id="collectionFamily" type="text" class="form-control" name="collectionFamily">
+                    </div>
+                </div>
+
+                <div class="col-6 mt-5 mx-auto text-center">
+                    <label for="collectionSymbol">What is the symbol for this collection?</label>
+                    <div class="mx-auto mt-3 col-8">
+                        <input id="collectionSymbol" type="text" class="form-control" name="collectionSymbol">
+                    </div>
+                </div>
+
+                <div class="col-6 mt-5 mx-auto text-center">
+                    <label for="collectionExternalUrl">What is the external URL for this collection?</label>
+                    <div class="mx-auto mt-3 col-8">
+                        <input id="collectionExternalUrl" type="text" class="form-control" name="collectionExternalUrl">
+                    </div>
+                </div>
+
+                <div class="col-6 mt-5 mx-auto text-center">
+                    <label for="secondRoyalties">How many royalties should creators receive for secondary sales, in percent?</label>
+                    <span class="text-muted">
+                        The royalties will be distributed to each creator, as determined below.
+                    </span>
+                    <div class="mx-auto mt-3 col-8">
+                        <input id="secondRoyalties" type="number" min="0" max="100" class="form-control" name="secondRoyalties" placeholder="%">
+                    </div>
+                </div>
+
+                <div class="col-8 mt-5 mx-auto text-center">
+                    <p class="mb-0">How should the royalties be split?</p>
+                    <span class="text-muted">
+                        The royalties will be distributed to each creator, as determined below.
+                    </span>
+                    <div class="address-container">
+                        <div class="row justify-content-center address-1">
+                            <div class="col-8 text-left">
+                                <label for="wallet-1" class="text-muted my-2">Wallet Address</label>
+                                <input id="wallet-1" type="text" class="form-control" name="wallet-1" placeholder="">
+                            </div>
+                            <div class="col-2">
+                                <label for="percent-1" class="text-muted my-2">Percentage</label>
+                                <input id="percent-1" type="number" min="0" max="100" class="form-control" name="percent-1" value="100" placeholder="%">
                             </div>
                         </div>
                     </div>
-                    <input type="text" class="d-none" id="blockchainSelectedValue" name="blockchainSelectedValue" value="ethBlockchain">
+
+                    <div class="row justify-content-center">
+                        <div class="col-8">
+                            <p class="add-address-text" onclick="addAnotherWalletAddress()">+ Add another wallet address</p>
+                        </div>
+                        <div class="col-2"></div>
+                    </div>
                 </div>
 
                 <div class="btn-container mt-4 mx-auto text-center">
-                    <button type="submit" id="nextButton" class="btn next-button">Next</button>
+                    <a href="{{ previousStepUrl }}" type="button" id="nextButton" class="btn text-white next-button mr-4">Back</a>
+                    <button type="submit" id="nextButton" class="btn text-white next-button">Next</button>
                 </div>
             </form>
         </div>
@@ -65,50 +100,87 @@
 
 </section>
 <!-- ========================= hero-section end ========================= -->
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    function openFolderBrowser() {
-        const folder = document.getElementById('folder');
-        folder.click();
+    function changeEachImageName(element) {
+        let name = element.value;
+        if (!name) name = 'NAME';
+        let eachImageNameText = document.getElementById('eachImageNameText');
+        eachImageNameText.innerText = `${name} #ID`;
     }
 
-    function openChangeFolderBrowser(input) {
-        console.log(input.files)
-        console.log(input.files[0].name)
-        console.log(input.files[0].size)
-        console.log(input.files[0].webkitRelativePath)
+    function addAnotherWalletAddress() {
+        let addressContainer = document.querySelector('.address-container');
+        let numberOfNewAddress = addressContainer.children.length + 1;
+        let newAddress = `
+        <div class="row justify-content-center address-${numberOfNewAddress}">
+            <div class="col-8 text-left">
+                <label for="wallet-${numberOfNewAddress}" class="text-muted my-2">Wallet Address</label>
+                <input id="wallet-${numberOfNewAddress}" type="text" class="form-control" name="wallet-${numberOfNewAddress}" placeholder="">
+            </div>
+            <div class="col-2">
+                <label for="percent-${numberOfNewAddress}" class="text-muted my-2">Percentage</label>
+                <input id="percent-${numberOfNewAddress}" type="number" min="0" max="100" class="form-control" name="percent-${numberOfNewAddress}" value="" placeholder="%">
+            </div>
+        </div>
+        `;
 
+        addressContainer.insertAdjacentHTML('beforeend', newAddress);
     }
 
-    function folderChanged(input) {
-    }
-
-    function changeBlockchain(blockchainSelected, blockchainNoSelected) {
-        if (blockchainSelected.classList.contains('selected')) return;
-
-        if (blockchainSelected.id === 'ethBlockchain') {
-            blockchainSelected.querySelector('.blockchainText').classList.add('text-white');
-
-            let btnBlockchainSelection = document.querySelector('.btn-blockchain-selection');
-            btnBlockchainSelection.setAttribute('style', 'width: calc(50% - 14px); left: calc(21px + (50% - 14px) * 1);');
-
-            let blockchainNoSelectedBtn = document.getElementById(blockchainNoSelected);
-            blockchainNoSelectedBtn.querySelector('.blockchainText').classList.remove('text-white');
-            blockchainSelected.classList.add('selected');
-            blockchainNoSelectedBtn.classList.remove('selected');
-        } else {
-            blockchainSelected.querySelector('.blockchainText').classList.add('text-white');
-
-            let btnBlockchainSelection = document.querySelector('.btn-blockchain-selection');
-            btnBlockchainSelection.setAttribute('style', 'width: calc(50% - 14px); left: calc(7px + (50% - 14px) * 0);');
-
-            let blockchainNoSelectedBtn = document.getElementById(blockchainNoSelected);
-            blockchainNoSelectedBtn.querySelector('.blockchainText').classList.remove('text-white');
-            blockchainSelected.classList.add('selected');
-            blockchainNoSelectedBtn.classList.remove('selected');
+    let thirdStepForm = document.getElementById('thirdStepForm');
+    thirdStepForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let validate = validateThirdStepForm();
+        if (!validate.success) {
+            return Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: validate.errors[0].message
+            })
         }
 
-        let blockchainSelectedValue = document.getElementById('blockchainSelectedValue');
-        blockchainSelectedValue.setAttribute('value', blockchainSelected.id);
+        thirdStepForm.submit();
+    });
+
+    function validateThirdStepForm() {
+        let errors = [];
+
+        let allPercent = document.querySelectorAll('[id^="percent-"]')
+        let allPercentValue = 0;
+        allPercent.forEach(function(element) {
+            if (
+                parseInt(element.value.replace(/\s/g, '')) === 0 ||
+                element.value === undefined ||
+                !element.value
+            ) {
+                return errors.push({
+                    success: false,
+                    message: 'Please fill all percentage'
+                });
+            }
+            allPercentValue += parseInt(element.value.replace(/\s/g, ''));
+        });
+        if (allPercentValue !== 100) {
+            errors.push({
+                success: false,
+                message: 'The sum of percentages for all the wallets must be 100%'
+            });
+        }
+
+        if (errors.length > 0) {
+            return {
+                success: false,
+                errors: errors
+            };
+        }
+
+        return {
+            success: true,
+            message: ''
+        }
     }
 
 </script>

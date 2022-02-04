@@ -1,0 +1,91 @@
+<!-- ========================= hero-section start ========================= -->
+<section id="home" class="hero-section">
+    <div class="shapes">
+        <div class="shape shape-1"></div>
+<!--        <div class="shape shape-2"></div>-->
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content-wrapper">
+        <div class="col-8 mx-auto text-center big-white-modal">
+            <form id="fourthStepForm" action="{{ saveFourthStepUrl }}" method="post">
+
+                <div class="titles-container mb-5">
+                    <h3 class="mb-3">Order the traits from top to bottom</h3>
+                    <h5>Traits at the top will be the top layer of each generated image</h5>
+                </div>
+
+                <div id="allTraitsContainer" class="all-traits-container">
+                    {{#each layers}}
+                        <div class="trait-container layer-{{ index }}">
+                            <div class="col-1 cursor-to-move">
+                                <img src="/img/move-layer.svg" alt="move layer">
+                            </div>
+                            <div class="col-8 layer-to-order">
+                                <span class="layer-name">{{ name }}</span>
+                                <span class="layer-files">{{ filesInside }}</span>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+
+                <textarea name="layersOrdered" id="layersOrdered" cols="30" rows="10" class="d-none"></textarea>
+
+                <div class="btn-container mt-4 mx-auto text-center">
+                    <a href="{{ previousStepUrl }}" type="button" id="nextButton" class="btn text-white next-button mr-4">Back</a>
+                    <button type="submit" id="nextButton" class="btn text-white next-button">Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+
+<!-- ========================= hero-section end ========================= -->
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+<script>
+    let layers = {{{json layers}}};
+</script>
+<script>
+    Sortable.create(allTraitsContainer, {
+        animation: 150,
+        store: {
+            /**
+             * Get the order of elements. Called once during initialization.
+             */
+            get: function (sortable) {
+                let sortableArray = sortable.toArray();
+                layers.forEach(function (layer, index) {
+                    layer.sortableIndex = sortableArray[index];
+                });
+                console.log(layers)
+                return layers;
+                // let order = JSON.parse(layers);
+                // console.log(order)
+                // return order ? order.split('|') : [];
+            },
+
+            /**
+             * Save the order of elements. Called onEnd (when the item is dropped).
+             */
+            set: function (sortable) {
+                let sortedArray = sortable.toArray();
+                let sortedLayers = [];
+                sortedArray.forEach(function (sortedIndex) {
+                    layers.find(function (layer) {
+                        if (layer.sortableIndex === sortedIndex) {
+                            sortedLayers.push(layer);
+                        }
+                    });
+                });
+
+                document.getElementById('layersOrdered').value = "";
+                document.getElementById('layersOrdered').value = JSON.stringify(sortedLayers);
+
+                return sortedLayers;
+            }
+        }
+    });
+</script>

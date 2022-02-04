@@ -99,8 +99,13 @@ const postLayersFolder = async (req, res = response) => {
 
 function getUserUploadedFolder(userUuid, mainFolderName) {
     let layers = []
-    fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}`).forEach(folder => {
-        layers.push(folder)
+    fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}`).forEach((folder, index) => {
+        layers.push({
+            index,
+            name: folder,
+            filesInside: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).length,
+            files: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`)
+        })
     })
 
     return layers
@@ -165,7 +170,102 @@ const seeThirdStep = async (req, res = response) => {
             pageTitle: "Fourth Step",
             mainFolderName,
             layers,
-            saveThirdStepUrl: '/nft-creation/save-third-step'
+            saveThirdStepUrl: '/nft-creation/save-third-step',
+            previousStepUrl: '/nft-creation/second-step'
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+
+}
+
+const saveThirdStep = async (req, res = response) => {
+    const body = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    try {
+        // TODO save data in DB
+        res.redirect(`/nft-creation/fourth-step`)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+
+}
+
+const seeFourthStep = async (req, res = response) => {
+    const body = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    if (!userUuid) {
+        return res.redirect('/nft-creation/first-step')
+    }
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    try {
+        res.render("nft_creation_step_4", {
+            pageTitle: "Fourth Step",
+            mainFolderName,
+            layers,
+            saveThirdStepUrl: '/nft-creation/save-fourth-step',
+            previousStepUrl: '/nft-creation/third-step'
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+
+}
+
+const saveFourthStep = async (req, res = response) => {
+    const { layersOrdered } = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    let oldLayers = getUserUploadedFolder(userUuid, mainFolderName);
+    console.log(layersOrdered)
+    try {
+        // TODO save data in DB
+        res.redirect(`/nft-creation/fifth-step`)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+
+}
+
+const seeFifthStep = async (req, res = response) => {
+    const body = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid;
+    if (!userUuid) {
+        return res.redirect('/nft-creation/first-step')
+    }
+    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    // TODO get layers ordered from last step
+    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    try {
+        res.render("nft_creation_step_5", {
+            pageTitle: "Fifth Step",
+            mainFolderName,
+            layers,
+            saveThirdStepUrl: '/nft-creation/save-fourth-step',
+            previousStepUrl: '/nft-creation/third-step'
         });
     } catch (error) {
         console.error(error);
@@ -182,5 +282,8 @@ module.exports = {
     postLayersFolder,
     seeSecondStep,
     saveSecondStep,
-    seeThirdStep
+    seeThirdStep,
+    saveThirdStep,
+    seeFourthStep,
+
 };

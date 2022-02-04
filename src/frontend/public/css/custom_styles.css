@@ -12,6 +12,20 @@ input[type=number] {
 }
 /* HIDE ARROW ON INPUTS TYPE NUMBER */
 
+.form-control::placeholder {
+    text-align: center;
+    font-size: 15px;
+}
+
+.form-control {
+    text-align: center;
+}
+
+textarea {
+    resize: none;
+    text-align: left !important;
+}
+
 .folder {
     position: relative;
     width: 120px;
@@ -21,7 +35,7 @@ input[type=number] {
     background: -webkit-linear-gradient(to right, #FFFFFF, #6DD5FA, #2980B9);  /* Chrome 10-25, Safari 5.1-6 */
     background: linear-gradient(to right, #FFFFFF, #6DD5FA, #2980B9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     border-radius: 0 6px 6px 6px;
-    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.59);
+    box-shadow: 4px 4px 7px #081760;
     cursor: pointer;
 }
 
@@ -51,14 +65,14 @@ input[type=number] {
     background-color: #FFFFFF;
     border-radius: 24px;
     height: 450px;
-    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.59);
+    box-shadow: 4px 4px 7px #081760;
 }
 
 .big-white-modal {
     padding: 50px 20px;
     background-color: #FFFFFF;
     border-radius: 24px;
-    box-shadow: 4px 4px 7px rgba(0, 0, 0, 0.59);
+    box-shadow: 4px 4px 7px #081760;
 }
 
 .text-muted {
@@ -104,15 +118,6 @@ input[type=number] {
     background-image: linear-gradient(#365ae1 0%, #244ae2 4.66%, #1029a6 76.69%, #1029a6 100%);
 }
 
-.form-control::placeholder {
-    text-align: center;
-    font-size: 15px;
-}
-
-.form-control {
-    text-align: center;
-}
-
 .next-button {
     background-color: #1832B1;
     color: #FFFFFF;
@@ -124,4 +129,50 @@ input[type=number] {
 
 .next-button:hover {
     color: white;
+}
+
+.address-container {}
+
+.add-address-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1832B1;
+    margin-bottom: 10px;
+    margin-top: 16px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.trait-container {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: grab;
+}
+
+.layer-to-order {
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 4px 4px 10px #c1c7e4;
+    padding: 14px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.layer-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1832B1;
+    text-align: left;
+}
+
+.layer-files {
+    font-size: 14px;
+    font-weight: bold;
+    color: #aab0cb;
+    text-align: left;
 }
