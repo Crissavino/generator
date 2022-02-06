@@ -1,12 +1,7 @@
 <!-- ========================= hero-section start ========================= -->
 <section id="home" class="hero-section">
-    <div class="shapes">
-        <div class="shape shape-1"></div>
-<!--        <div class="shape shape-2"></div>-->
-        <div class="shape shape-3"></div>
-    </div>
-    <div class="hero-content-wrapper">
-        <div class="col-8 mx-auto text-center big-white-modal">
+    <div class="container">
+        <div class="col-12 col-lg-8 p-3 mx-auto text-center big-white-modal">
             <form id="fourthStepForm" action="{{ saveFourthStepUrl }}" method="post">
 
                 <div class="titles-container mb-5">
@@ -17,10 +12,10 @@
                 <div id="allTraitsContainer" class="all-traits-container">
                     {{#each layers}}
                         <div class="trait-container layer-{{ index }}">
-                            <div class="col-1 cursor-to-move">
+                            <div class="col-1 mr-2 cursor-to-move">
                                 <img src="/img/move-layer.svg" alt="move layer">
                             </div>
-                            <div class="col-8 layer-to-order">
+                            <div class="col-10 col-lg-8 layer-to-order">
                                 <span class="layer-name">{{ name }}</span>
                                 <span class="layer-files">{{ filesInside }}</span>
                             </div>

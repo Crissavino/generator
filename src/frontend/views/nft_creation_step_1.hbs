@@ -3,13 +3,8 @@
     <div class="hero-content-wrapper">
         <h1 class="text-white wow fadeInDown text-center" data-wow-delay=".1s">Upload your folder of layers</h1>
     </div>
-    <div class="shapes">
-        <div class="shape shape-1"></div>
-<!--        <div class="shape shape-2"></div>-->
-        <div class="shape shape-3"></div>
-    </div>
     <div class="container">
-        <div class="col-8 mx-auto uploader-background">
+        <div class="col-12 col-lg-8 p-3 mx-auto uploader-background">
             <div class="wow fadeInLeft folder" onclick="openFolderBrowser()" data-wow-delay=".1s">
                 <div class="back"></div>
                 <div class="cover"></div>
@@ -17,7 +12,7 @@
                 <div class="paper"></div>
                 <div class="paper"></div>
             </div>
-            <p class="wow fadeInLeft" data-wow-delay=".1s">Start a new project connection your layers folder.</p>
+            <p class="wow fadeInLeft" data-wow-delay=".1s">Start a new project connecting your layers folder.</p>
             <p class="wow fadeInLeft" data-wow-delay=".1s">Images (.png files) and gifs (.gif files) are supported</p>
             <a class="theme-btn wow fadeInLeft upload-folder-btn" onclick="openFolderBrowser()" id="folderLink" data-wow-delay=".1s">
                 Choose folder
@@ -34,11 +29,6 @@
     function openFolderBrowser() {
         const layersFolder = document.getElementById('layersFolder');
         layersFolder.click();
-    }
-
-    function layersFolderUploaded2(input) {
-        let folderForm = document.getElementById('folderForm');
-        folderForm.submit();
     }
 
     function layersFolderUploaded(input) {

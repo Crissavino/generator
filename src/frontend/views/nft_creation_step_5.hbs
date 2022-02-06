@@ -1,12 +1,7 @@
 <!-- ========================= hero-section start ========================= -->
 <section id="home" class="hero-section">
-    <div class="shapes">
-        <div class="shape shape-1"></div>
-<!--        <div class="shape shape-2"></div>-->
-        <div class="shape shape-3"></div>
-    </div>
-    <div class="hero-content-wrapper">
-        <div class="col-8 mx-auto text-center big-white-modal">
+    <div class="container">
+        <div class="col-12 col-lg-8 p-3 mx-auto text-center big-white-modal">
             <form id="fifthStepForm" action="{{ saveFifthStepUrl }}" method="post">
 
                 {{#each layers}}
@@ -21,12 +16,12 @@
                             </p>
                         </div>
 
-                        <div class="buttons-to-allocate-container">
-                            <button type="button" class="btn btn-primary-custom mr-4">Allocate Evenly</button>
-                            <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json files }})" type="button" class="btn btn-primary-custom">Paste from CSV or TSV</button>
+                        <div class="buttons-to-allocate-container row justify-content-center">
+                            <button onclick="allocateTraitEvenly(`{{ name }}`, {{json files }}, {{ ../totalNFTToGenerate }})" type="button" class="btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-8 col-lg-3">Allocate Evenly</button>
+                            <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json files }})" type="button" class="btn btn-primary-custom col-8 col-lg-3">Paste from CSV or TSV</button>
                         </div>
 
-                        <div class="col-6 my-5 mx-auto variants-container" id="variantContainerOf-{{ name }}">
+                        <div class="col-12 col-lg-6 my-5 mx-auto variants-container" id="variantContainerOf-{{ name }}">
                             {{#each files}}
                                 <div class="col-10 variant">
                                     <div class="col-4 text-right d-flex">
@@ -101,5 +96,20 @@
 
             }
         })
+    }
+
+    function allocateTraitEvenly(traitToAllocate, files, totalNftToGenerate) {
+        let evenlyNumber = Math.floor(totalNftToGenerate / files.length);
+        let remainder = totalNftToGenerate % files.length;
+        let variantContainer = document.getElementById('variantContainerOf-' + traitToAllocate);
+        let allVariantInput = variantContainer.querySelectorAll('[class^="variant-allocate-input-of-"]');
+        files.forEach(function (file, index) {
+            allVariantInput[index].value = evenlyNumber;
+            allVariantInput[index].dispatchEvent(new Event('change'));
+        });
+        if (remainder > 0) {
+            allVariantInput[files.length - 1].value = evenlyNumber + remainder;
+            allVariantInput[files.length - 1].dispatchEvent(new Event('change'));
+        }
     }
 </script>

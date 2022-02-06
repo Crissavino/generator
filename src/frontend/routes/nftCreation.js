@@ -4,6 +4,7 @@ const {
     seeFirstStep,
     postLayersFolder,
     seeSecondStep,
+    replaceLayersFolder,
     saveSecondStep,
     seeThirdStep,
     saveThirdStep,
@@ -21,6 +22,11 @@ router.get(
 router.post(
     '/nft-creation/post-layers-folder',
     postLayersFolder
+);
+
+router.post(
+    '/nft-creation/replace-layers-folder',
+    replaceLayersFolder
 );
 
 router.get(
