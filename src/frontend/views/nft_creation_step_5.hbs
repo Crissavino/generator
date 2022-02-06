@@ -11,14 +11,14 @@
                             <p class="mb-2">
                                 This must add up to #{{ ../totalNFTToGenerate }}, the total number of NFTs you are generating.
                             </p>
-                            <p class="mb-0" style="font-size: 14px">
+                            <p class="mb-0 number-left-text" style="font-size: 14px">
                                 Number left to allocate: #{{ ../totalNFTToGenerate }}
                             </p>
                         </div>
 
                         <div class="buttons-to-allocate-container row justify-content-center">
                             <button onclick="allocateTraitEvenly(`{{ name }}`, {{json files }}, {{ ../totalNFTToGenerate }})" type="button" class="btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-8 col-lg-3">Allocate Evenly</button>
-                            <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json files }})" type="button" class="btn btn-primary-custom col-8 col-lg-3">Paste from CSV or TSV</button>
+                            <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json files }}, {{ ../totalNFTToGenerate }})" type="button" class="btn btn-primary-custom col-8 col-lg-3">Paste from CSV or TSV</button>
                         </div>
 
                         <div class="col-12 col-lg-6 my-5 mx-auto variants-container" id="variantContainerOf-{{ name }}">
@@ -28,10 +28,10 @@
                                         <span class="variant-name">{{ name }}</span>
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" name="variant" id="variant" class="variant-allocate-input-of-{{@key}} form-control custom">
+                                        <input type="number" name="variant" id="variant" oninput="changeVariantData(this, {{@key}}, {{ ../../totalNFTToGenerate }})" class="variant-allocate-input-of-{{@key}} form-control custom">
                                     </div>
                                     <div class="col-2 text-left">
-                                        <span class="variant-allocate-percentage-of-{{ name }}">0%</span>
+                                        <span class="variant-allocate-percentage-of-{{ @key }}">0%</span>
                                     </div>
                                 </div>
                             {{/each}}
@@ -60,7 +60,7 @@
 </style>
 <script>
 
-    function allocateTraitFromSpreadsheet(traitToAllocate, files) {
+    function allocateTraitFromSpreadsheet(traitToAllocate, files, totalNftToGenerate) {
         Swal.fire({
             title: `Paste your ${traitToAllocate} allocation from a spreadsheet`,
             html:
@@ -77,6 +77,7 @@
             if (result.isConfirmed) {
                 let variantContainer = document.getElementById('variantContainerOf-' + traitToAllocate);
                 let allVariantInput = variantContainer.querySelectorAll('[class^="variant-allocate-input-of-"]');
+                let allVariantPercent = variantContainer.querySelectorAll('[class^="variant-allocate-percentage-of-"]');
                 let csvTextarea = document.getElementById('csvTextarea');
                 let csvText = csvTextarea.value.trim();
                 if (csvText === '' || csvText === undefined) return;
@@ -89,7 +90,8 @@
                     files.forEach(function (file, index) {
                         if (file.name === variantName) {
                             allVariantInput[index].value = variantAllocation;
-                            allVariantInput[index].dispatchEvent(new Event('change'));
+                            // allVariantPercent[index].innerText = `${(variantAllocation / totalNftToGenerate) * 100}%`;
+                            allVariantInput[index].dispatchEvent(new Event('input'));
                         }
                     });
                 });
@@ -103,13 +105,53 @@
         let remainder = totalNftToGenerate % files.length;
         let variantContainer = document.getElementById('variantContainerOf-' + traitToAllocate);
         let allVariantInput = variantContainer.querySelectorAll('[class^="variant-allocate-input-of-"]');
+        let allVariantPercent = variantContainer.querySelectorAll('[class^="variant-allocate-percentage-of-"]');
         files.forEach(function (file, index) {
             allVariantInput[index].value = evenlyNumber;
-            allVariantInput[index].dispatchEvent(new Event('change'));
+            // allVariantPercent[index].innerText = `${(evenlyNumber / totalNftToGenerate) * 100}%`;
+            allVariantInput[index].dispatchEvent(new Event('input'));
         });
         if (remainder > 0) {
             allVariantInput[files.length - 1].value = evenlyNumber + remainder;
-            allVariantInput[files.length - 1].dispatchEvent(new Event('change'));
+            // allVariantPercent[files.length - 1].innerText = `${((evenlyNumber + remainder) / totalNftToGenerate) * 100}%`;
+            allVariantInput[files.length - 1].dispatchEvent(new Event('input'));
         }
+    }
+
+    function changeVariantData(variantInput, fileIndex, totalNftToGenerate) {
+        let variantPercentSpan = variantInput.parentElement.parentElement.parentElement.querySelector(`.variant-allocate-percentage-of-${fileIndex}`);
+        if (variantInput.value === '' || variantInput.value === undefined || variantInput.value === 0) {
+            variantPercentSpan.innerText = '0%';
+        } else {
+            variantPercentSpan.innerText = `${Math.round((parseInt(variantInput.value) + Number.EPSILON) * 100) / totalNftToGenerate}%`;
+        }
+
+        let allVariantInput = variantInput.parentElement.parentElement.parentElement.querySelectorAll('[class^="variant-allocate-input-of-"]');
+        let numberLeftText = variantInput.parentElement.parentElement.parentElement.parentElement.querySelector('.number-left-text');
+        let totalAllocated = 0;
+        allVariantInput.forEach(function (variantInput) {
+            if (!variantInput.value) return;
+            totalAllocated += parseInt(variantInput.value);
+        });
+
+        if (totalAllocated > totalNftToGenerate) {
+            return Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Total allocated number is greater than total number of NFTs to generate.',
+            }).then(() => {
+                let previousValue = parseInt(variantInput.value);
+                variantInput.value = '';
+                variantPercentSpan.innerText = '0%';
+                numberLeftText.innerText = `Number left to allocate: #${totalNftToGenerate - totalAllocated + previousValue}`;
+            });
+        }
+
+        if (totalAllocated === 0) {
+            numberLeftText.innerText = `Number left to allocate: #${parseInt(totalNftToGenerate)}`;
+        } else {
+            numberLeftText.innerText = `Number left to allocate: #${(parseInt(totalNftToGenerate) - totalAllocated)}`;
+        }
+
     }
 </script>
