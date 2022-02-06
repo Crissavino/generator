@@ -23,20 +23,20 @@
 
                         <div class="buttons-to-allocate-container">
                             <button type="button" class="btn btn-primary-custom mr-4">Allocate Evenly</button>
-                            <button type="button" class="btn btn-primary-custom">Paste from CSV or TSV</button>
+                            <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json files }})" type="button" class="btn btn-primary-custom">Paste from CSV or TSV</button>
                         </div>
 
-                        <div class="col-6 my-5 mx-auto variants-container">
+                        <div class="col-6 my-5 mx-auto variants-container" id="variantContainerOf-{{ name }}">
                             {{#each files}}
                                 <div class="col-10 variant">
                                     <div class="col-4 text-right d-flex">
                                         <span class="variant-name">{{ name }}</span>
                                     </div>
                                     <div class="col-4">
-                                        <input type="number" name="variant" id="variant" class="form-control custom">
+                                        <input type="number" name="variant" id="variant" class="variant-allocate-input-of-{{@key}} form-control custom">
                                     </div>
                                     <div class="col-2 text-left">
-                                        <span>0%</span>
+                                        <span class="variant-allocate-percentage-of-{{ name }}">0%</span>
                                     </div>
                                 </div>
                             {{/each}}
@@ -58,6 +58,48 @@
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<style>
+    .swal2-html-container {
+        margin-top: 0 !important;
+    }
+</style>
 <script>
 
+    function allocateTraitFromSpreadsheet(traitToAllocate, files) {
+        Swal.fire({
+            title: `Paste your ${traitToAllocate} allocation from a spreadsheet`,
+            html:
+                    `<p style="font-size: 14px" class="mb-4">Paste in a comma-separated format and click "Use it!"</p>` +
+                    `<div class="col-12 m-auto copy-from-csv">` +
+                    ((files.length > 1)
+                            ? `<textarea rows="10" cols="10" id="csvTextarea" class="form-control w-75 m-auto" placeholder="${files[0].name}, 1000 \n${files[1].name}, 1000"></textarea>`
+                            : `<textarea rows="10" cols="10" id="csvTextarea" class="form-control w-75 m-auto" placeholder="${files[0].name}, 1000"></textarea>`) +
+                    `</div>`,
+            showCloseButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Use it!',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let variantContainer = document.getElementById('variantContainerOf-' + traitToAllocate);
+                let allVariantInput = variantContainer.querySelectorAll('[class^="variant-allocate-input-of-"]');
+                let csvTextarea = document.getElementById('csvTextarea');
+                let csvText = csvTextarea.value.trim();
+                if (csvText === '' || csvText === undefined) return;
+                let csvArrayByNewLine = csvText.split('\n');
+                csvArrayByNewLine.forEach(function (csvLine, index) {
+                    let csvArrayByComma = csvLine.split(',');
+                    if (csvLine.trim() === '') return;
+                    let variantName = csvArrayByComma[0].trim();
+                    let variantAllocation = parseInt(csvArrayByComma[1].trim());
+                    files.forEach(function (file, index) {
+                        if (file.name === variantName) {
+                            allVariantInput[index].value = variantAllocation;
+                            allVariantInput[index].dispatchEvent(new Event('change'));
+                        }
+                    });
+                });
+
+            }
+        })
+    }
 </script>

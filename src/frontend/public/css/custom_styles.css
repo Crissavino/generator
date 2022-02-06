@@ -23,12 +23,24 @@ input[type=number] {
 
 .form-control.custom {
     border: none;
-    box-shadow: 4px 4px 10px #c1c7e4;
+    /*box-shadow: 4px 4px 10px #c1c7e4;*/
+    box-shadow: 0 0 20px #a4afe9;
     padding: 10px 20px;
 }
 
 textarea {
     resize: none;
+    text-align: left !important;
+}
+
+
+textarea#csvTextarea {
+    /*box-shadow: 4px 4px 10px #c1c7e4;*/
+    box-shadow: 0 0 20px #a4afe9;
+}
+
+textarea#csvTextarea::placeholder {
+    font-size: 15px;
     text-align: left !important;
 }
 
@@ -105,7 +117,8 @@ textarea {
     border-color: #1832B1;
     height: 42px;
     /*transition: left .5s;*/
-    box-shadow: 4px 4px 10px #c1c7e4;
+    /*box-shadow: 4px 4px 10px #c1c7e4;*/
+    box-shadow: 0 0 20px #a4afe9;
     transition: transform 0.3s ease-in-out;
 }
 
@@ -137,7 +150,8 @@ textarea {
 .layer-to-order {
     background-color: #FFFFFF;
     border-radius: 10px;
-    box-shadow: 4px 4px 10px #c1c7e4;
+    /*box-shadow: 4px 4px 10px #c1c7e4;*/
+    box-shadow: 0 0 20px #a4afe9;
     padding: 14px 20px;
 
     display: flex;
@@ -166,7 +180,8 @@ textarea {
     height: 42px;
     /*transition: left .5s;*/
     color: #FFFFFF;
-    box-shadow: 4px 4px 10px #c1c7e4;
+    /*box-shadow: 4px 4px 10px #c1c7e4;*/
+    box-shadow: 0 0 20px #a4afe9;
     transition: transform 0.3s ease-in-out;
 }
 
@@ -195,4 +210,8 @@ textarea {
     overflow: hidden;
     width: 100%;
     white-space: nowrap;
+}
+
+.copy-from-csv {
+    min-height: 275px;
 }
