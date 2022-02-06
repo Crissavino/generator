@@ -21,35 +21,15 @@ input[type=number] {
     text-align: center;
 }
 
+.form-control.custom {
+    border: none;
+    box-shadow: 4px 4px 10px #c1c7e4;
+    padding: 10px 20px;
+}
+
 textarea {
     resize: none;
     text-align: left !important;
-}
-
-.folder {
-    position: relative;
-    width: 120px;
-    height: 84px;
-    margin: 50px auto 0;
-    background: #2980B9;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #FFFFFF, #6DD5FA, #2980B9);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to right, #FFFFFF, #6DD5FA, #2980B9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    border-radius: 0 6px 6px 6px;
-    box-shadow: 4px 4px 7px #081760;
-    cursor: pointer;
-}
-
-.folder:before {
-    content: '';
-    width: 50%;
-    height: 10px;
-    border-radius: 6px 6px 0 0;
-    background: #FFFFFF;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(to right, #FFFFFF, #b1e8fc, #6DD5FA);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to right, #FFFFFF, #b1e8fc, #6DD5FA);
-    position: absolute;
-    top: -10px;
-    left: 0;
 }
 
 .hero-section {
@@ -124,7 +104,9 @@ textarea {
     border-radius: 8px;
     border-color: #1832B1;
     height: 42px;
-    transition: left .5s;
+    /*transition: left .5s;*/
+    box-shadow: 4px 4px 10px #c1c7e4;
+    transition: transform 0.3s ease-in-out;
 }
 
 .next-button:hover {
@@ -175,4 +157,42 @@ textarea {
     font-weight: bold;
     color: #aab0cb;
     text-align: left;
+}
+
+.btn-primary-custom {
+    background-color: #1832B1;
+    border-radius: 8px;
+    border-color: #1832B1;
+    height: 42px;
+    /*transition: left .5s;*/
+    color: #FFFFFF;
+    box-shadow: 4px 4px 10px #c1c7e4;
+    transition: transform 0.3s ease-in-out;
+}
+
+.btn-primary-custom:hover {
+    color: white;
+}
+
+.variants-container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+.variant {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.variant-name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    white-space: nowrap;
 }

@@ -104,7 +104,13 @@ function getUserUploadedFolder(userUuid, mainFolderName) {
             index,
             name: folder,
             filesInside: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).length,
-            files: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`)
+            files: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).map(file => {
+                return {
+                    completeName: file,
+                    name: file.split('.')[0],
+                    url: `/layers/${userUuid}/${mainFolderName}/${folder}/${file}`
+                }
+            })
         })
     })
 
@@ -138,12 +144,14 @@ const seeSecondStep = async (req, res = response) => {
 }
 
 const saveSecondStep = async (req, res = response) => {
-    const body = req.body;
-    let session = req.session;
-    let userUuid = session.userUuid;
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-    let layers = getUserUploadedFolder(userUuid, mainFolderName);
     try {
+        const { imagesToGenerate } = req.body;
+        let session = req.session;
+        // TODO recover from database
+        session.totalNFTToGenerate = imagesToGenerate;
+        let userUuid = session.userUuid;
+        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+        let layers = getUserUploadedFolder(userUuid, mainFolderName);
         // TODO save data in DB
         res.redirect(`/nft-creation/third-step`)
     } catch (error) {
@@ -216,7 +224,7 @@ const seeFourthStep = async (req, res = response) => {
             pageTitle: "Fourth Step",
             mainFolderName,
             layers,
-            saveThirdStepUrl: '/nft-creation/save-fourth-step',
+            saveFourthStepUrl: '/nft-creation/save-fourth-step',
             previousStepUrl: '/nft-creation/third-step'
         });
     } catch (error) {
@@ -236,6 +244,7 @@ const saveFourthStep = async (req, res = response) => {
     const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
     let oldLayers = getUserUploadedFolder(userUuid, mainFolderName);
     console.log(layersOrdered)
+    console.log('entra aca')
     try {
         // TODO save data in DB
         res.redirect(`/nft-creation/fifth-step`)
@@ -259,13 +268,16 @@ const seeFifthStep = async (req, res = response) => {
     const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
     // TODO get layers ordered from last step
     let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    console.log(layers)
     try {
         res.render("nft_creation_step_5", {
             pageTitle: "Fifth Step",
             mainFolderName,
             layers,
-            saveThirdStepUrl: '/nft-creation/save-fourth-step',
-            previousStepUrl: '/nft-creation/third-step'
+            saveFifthStepUrl: '/nft-creation/save-fifth-step',
+            previousStepUrl: '/nft-creation/fourth-step',
+            totalNFTToGenerate: 10000
+            // totalNFTToGenerate: session.totalNFTToGenerate
         });
     } catch (error) {
         console.error(error);
@@ -285,5 +297,6 @@ module.exports = {
     seeThirdStep,
     saveThirdStep,
     seeFourthStep,
-
+    saveFourthStep,
+    seeFifthStep,
 };

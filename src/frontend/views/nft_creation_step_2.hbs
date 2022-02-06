@@ -13,7 +13,14 @@
             </p>
             <form action="{{ saveSecondStepUrl }}" method="post">
                 <div class="d-flex flex-column justify-content-center align-items-center">
-                    <span class="wow fadeInLeft folder" onclick="openFolderBrowser()" data-wow-delay=".1s"></span> <br>
+                    <div class="wow fadeInLeft folder" onclick="openFolderBrowser()" data-wow-delay=".1s">
+                        <div class="back"></div>
+                        <div class="cover"></div>
+                        <div class="paper"></div>
+                        <div class="paper"></div>
+                        <div class="paper"></div>
+                    </div>
+                    <br>
                     <a class="custom-link wow fadeInLeft" onclick="openChangeFolderBrowser()" id="changeFolderLink" data-wow-delay=".1s">
                         Change folder
                     </a>
@@ -23,14 +30,14 @@
                 <div class="col-6 mt-5 mx-auto text-center">
                     <label for="projectName">What’s the name of this project?</label>
                     <div class="mx-auto mt-3 col-8">
-                        <input id="projectName" type="text" class="form-control" name="projectName">
+                        <input id="projectName" type="text" class="form-control custom" name="projectName">
                     </div>
                 </div>
 
                 <div class="col-6 mt-5 mx-auto text-center">
                     <label for="imagesToGenerate">How many images do you want to generate in total?</label>
                     <div class="mx-auto mt-3 col-4">
-                        <input id="imagesToGenerate" type="number" min="10" max="10000" class="form-control col-4" name="imagesToGenerate">
+                        <input id="imagesToGenerate" type="number" min="10" max="10000" class="form-control custom col-4" name="imagesToGenerate">
                     </div>
                 </div>
 
@@ -44,10 +51,10 @@
                         <div class="btn-blockchain-toggle">
                             <div class="btn-blockchain-toggle-container" style="grid-template-columns: repeat(2, minmax(0px, 1fr));">
                                 <div class="btn-blockchain-selection" style="width: calc(50% - 14px); left: calc(21px + (50% - 14px) * 1);"></div>
-                                <button onclick="changeBlockchain(this, 'ethBlockchain')" id="solBlockchain" class="btn-blockchain-plain" style="background-color: transparent;">
+                                <button type="button" onclick="changeBlockchain(this, 'ethBlockchain')" id="solBlockchain" class="btn-blockchain-plain" style="background-color: transparent;">
                                     <div class="blockchainText">Solana</div>
                                 </button>
-                                <button onclick="changeBlockchain(this, 'solBlockchain')" id="ethBlockchain" class="btn-blockchain-plain selected" style="background-color: transparent;">
+                                <button type="button" onclick="changeBlockchain(this, 'solBlockchain')" id="ethBlockchain" class="btn-blockchain-plain selected" style="background-color: transparent;">
                                     <div class="blockchainText text-white">Ethereum</div>
                                 </button>
                             </div>

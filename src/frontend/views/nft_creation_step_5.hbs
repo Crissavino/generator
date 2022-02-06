@@ -1,0 +1,63 @@
+<!-- ========================= hero-section start ========================= -->
+<section id="home" class="hero-section">
+    <div class="shapes">
+        <div class="shape shape-1"></div>
+<!--        <div class="shape shape-2"></div>-->
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content-wrapper">
+        <div class="col-8 mx-auto text-center big-white-modal">
+            <form id="fifthStepForm" action="{{ saveFifthStepUrl }}" method="post">
+
+                {{#each layers}}
+                    <div id="allocateTraitContainer" class="allocate-trait-container">
+                        <div class="titles-container mb-4">
+                            <h5 class="mb-3">For the trait "{{ name }}" how many of each variant should be used?</h5>
+                            <p class="mb-2">
+                                This must add up to #{{ ../totalNFTToGenerate }}, the total number of NFTs you are generating.
+                            </p>
+                            <p class="mb-0" style="font-size: 14px">
+                                Number left to allocate: #{{ ../totalNFTToGenerate }}
+                            </p>
+                        </div>
+
+                        <div class="buttons-to-allocate-container">
+                            <button type="button" class="btn btn-primary-custom mr-4">Allocate Evenly</button>
+                            <button type="button" class="btn btn-primary-custom">Paste from CSV or TSV</button>
+                        </div>
+
+                        <div class="col-6 my-5 mx-auto variants-container">
+                            {{#each files}}
+                                <div class="col-10 variant">
+                                    <div class="col-4 text-right d-flex">
+                                        <span class="variant-name">{{ name }}</span>
+                                    </div>
+                                    <div class="col-4">
+                                        <input type="number" name="variant" id="variant" class="form-control custom">
+                                    </div>
+                                    <div class="col-2 text-left">
+                                        <span>0%</span>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </div>
+                </div>
+                {{/each}}
+
+                <div class="btn-container mt-4 mx-auto text-center">
+                    <a href="{{ previousStepUrl }}" type="button" id="nextButton" class="btn text-white next-button mr-4">Back</a>
+                    <button type="submit" id="nextButton" class="btn text-white next-button">Next</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+
+<!-- ========================= hero-section end ========================= -->
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+</script>
