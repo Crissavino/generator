@@ -131,6 +131,8 @@
         let validate = validateThirdStepForm();
         if (!validate.success) {
             return Swal.fire({
+                width: 300,
+                position: 'bottom-end',
                 icon: 'error',
                 title: 'Oops...',
                 text: validate.errors[0].message

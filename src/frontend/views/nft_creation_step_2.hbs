@@ -100,12 +100,16 @@
                     console.log(response)
                     if (response && response.success === false) {
                         return Swal.fire({
+                            width: 300,
+                            position: 'bottom-end',
                             icon: 'error',
                             title: 'Oops...',
                             text: response.message,
                         });
                     } else {
-                        return Swal.fire({
+                        Swal.fire({
+                            width: 300,
+                            position: 'bottom-end',
                             icon: 'success',
                             title: 'Success!',
                             text: 'Your layers folder has been replaced.',

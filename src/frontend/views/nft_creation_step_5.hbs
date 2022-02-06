@@ -62,6 +62,8 @@
 
     function allocateTraitFromSpreadsheet(traitToAllocate, files, totalNftToGenerate) {
         Swal.fire({
+            width: 300,
+            position: 'bottom-end',
             title: `Paste your ${traitToAllocate} allocation from a spreadsheet`,
             html:
                     `<p style="font-size: 14px" class="mb-4">Paste in a comma-separated format and click "Use it!"</p>` +
@@ -136,6 +138,8 @@
 
         if (totalAllocated > totalNftToGenerate) {
             return Swal.fire({
+                width: 300,
+                position: 'bottom-end',
                 icon: 'error',
                 title: 'Oops...',
                 text: 'Total allocated number is greater than total number of NFTs to generate.',
