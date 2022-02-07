@@ -1,46 +1,78 @@
 <!-- ========================= hero-section start ========================= -->
 <section id="home" class="hero-section">
     <div class="container">
-        <div class="col-12 col-lg-8 p-3 mx-auto text-center big-white-modal">
+        <div class="col-12 col-lg-8 p-3 mx-auto text-center">
             <form id="fifthStepForm" action="{{ saveFifthStepUrl }}" method="post">
 
                 {{#each layers}}
-                    <div id="allocateTraitContainer" class="allocate-trait-container">
-                        <div class="titles-container mb-4">
-                            <h5 class="mb-3">For the trait "{{ name }}" how many of each variant should be used?</h5>
-                            <p class="mb-2">
-                                This must add up to #{{ ../totalNFTToGenerate }}, the total number of NFTs you are generating.
-                            </p>
-                            <p class="mb-0 number-left-text" style="font-size: 14px">
-                                Number left to allocate: #{{ ../totalNFTToGenerate }}
-                            </p>
+                    <div>
+                        <div class="layer-title white-modal"
+                             onclick="animateLayer(this)"
+                             onmouseover="animateLayerTitleOnMouseEnter(this)"
+                             onmouseleave="animateLayerTitleOnMouseLeave(this)">
+                            <lottie-player src="https://assets7.lottiefiles.com/packages/lf20_k1ejm9vc.json"
+                                           background="transparent"
+                                           speed="1.5"
+                                           style="width: 128px; transform: rotate(180deg); position: relative; top: 4px;"
+                                           class="lottie-player"
+                            ></lottie-player>
+                            <h4 class="">
+                                "{{ name }}" layer
+                            </h4>
                         </div>
 
-                        <div class="buttons-to-allocate-container row justify-content-center">
-                            <button onclick="allocateTraitEvenly(`{{ name }}`, {{json files }}, {{ ../totalNFTToGenerate }})" type="button" class="btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-8 col-lg-3">Allocate Evenly</button>
-                            <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json files }}, {{ ../totalNFTToGenerate }})" type="button" class="btn btn-primary-custom col-8 col-lg-3">Paste from CSV or TSV</button>
-                        </div>
+                        <div class="allocate-trait-container d-none white-modal">
+                            <div class="titles-container mb-4">
+                                <h5 class="">
+                                    For the trait "{{ name }}" how many of each variant should be used?
+                                </h5>
+                                <p class="mb-2">
+                                    This must add up to #{{ ../totalNFTToGenerate }}, the total number of NFTs you are
+                                    generating.
+                                </p>
+                                <p class="mb-0 number-left-text" style="font-size: 14px">
+                                    Number left to allocate: #{{ ../totalNFTToGenerate }}
+                                </p>
+                            </div>
 
-                        <div class="col-12 col-lg-6 my-5 mx-auto variants-container" id="variantContainerOf-{{ name }}">
-                            {{#each files}}
-                                <div class="col-10 variant">
-                                    <div class="col-4 text-right d-flex">
-                                        <span class="variant-name">{{ name }}</span>
+                            <div class="buttons-to-allocate-container row justify-content-center">
+                                <button onclick="allocateTraitEvenly(`{{ name }}`, {{json
+                                        files }}, {{ ../totalNFTToGenerate }})" type="button"
+                                        class="btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-9 col-lg-3">Allocate
+                                    Evenly
+                                </button>
+                                <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json
+                                        files }}, {{ ../totalNFTToGenerate }})" type="button"
+                                        class="btn btn-primary-custom col-9 col-lg-4">Paste from CSV or TSV
+                                </button>
+                            </div>
+
+                            <div class="col-12 col-lg-6 my-5 mx-auto variants-container"
+                                 id="variantContainerOf-{{ name }}">
+                                {{#each files}}
+                                    <div class="col-10 variant">
+                                        <div class="col-4 text-right d-flex">
+                                            <span class="variant-name">{{ name }}</span>
+                                        </div>
+                                        <div class="col-4">
+                                            <input type="number" name="variant" id="variant"
+                                                   oninput="changeVariantData(this, {{@key}}, {{ ../../totalNFTToGenerate }})"
+                                                   class="variant-allocate-input-of-{{@key}} form-control custom">
+                                        </div>
+                                        <div class="col-2 text-left">
+                                            <span class="variant-allocate-percentage-of-{{ @key }}">0%</span>
+                                        </div>
                                     </div>
-                                    <div class="col-4">
-                                        <input type="number" name="variant" id="variant" oninput="changeVariantData(this, {{@key}}, {{ ../../totalNFTToGenerate }})" class="variant-allocate-input-of-{{@key}} form-control custom">
-                                    </div>
-                                    <div class="col-2 text-left">
-                                        <span class="variant-allocate-percentage-of-{{ @key }}">0%</span>
-                                    </div>
-                                </div>
-                            {{/each}}
+                                {{/each}}
+                            </div>
+
                         </div>
-                </div>
+                    </div>
                 {{/each}}
 
                 <div class="btn-container mt-4 mx-auto text-center">
-                    <a href="{{ previousStepUrl }}" type="button" id="nextButton" class="btn text-white next-button mr-4">Back</a>
+                    <a href="{{ previousStepUrl }}" type="button" id="nextButton"
+                       class="btn text-white next-button mr-4">Back</a>
                     <button type="submit" id="nextButton" class="btn text-white next-button">Next</button>
                 </div>
             </form>
@@ -52,6 +84,7 @@
 <!-- ========================= hero-section end ========================= -->
 
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
 <style>
     .swal2-html-container {
@@ -158,4 +191,47 @@
         }
 
     }
+
+    function animateLayer(layerTitle) {
+        let lottiePlayer = layerTitle.getElementsByTagName('lottie-player')[0];
+        let lottie = lottiePlayer.getLottie();
+        let allocateTraitContainer = lottiePlayer.parentElement.parentElement.querySelector('.allocate-trait-container');
+        if (lottiePlayer.classList.contains('is-animated')) {
+            lottie.playSegments([120, 240], true);
+            lottiePlayer.classList.remove('is-animated');
+            allocateTraitContainer.classList.remove(...['animate__animated', 'animate__fadeIn']);
+            allocateTraitContainer.classList.add(...['animate__animated', 'animate__fadeOut']);
+            setTimeout(() => {
+                allocateTraitContainer.classList.add('d-none')
+            }, 200)
+        } else {
+            lottie.playSegments([0, 120], true);
+            lottiePlayer.classList.add('is-animated');
+            allocateTraitContainer.classList.remove('d-none')
+            allocateTraitContainer.classList.add(...['animate__animated', 'animate__fadeIn']);
+            allocateTraitContainer.classList.remove(...['animate__animated', 'animate__fadeOut']);
+        }
+    }
+
+    function animateLayerTitleOnMouseEnter(element) {
+        let lottiePlayer = element.getElementsByTagName('lottie-player')[0];
+        if (lottiePlayer.classList.contains('is-animated')) return;
+        if (!element.classList.contains('animate__pulse')) {
+            element.classList.add(...['animate__animated', 'animate__pulse']);
+        }
+    }
+
+    function animateLayerTitleOnMouseLeave(element) {
+        let lottiePlayer = element.getElementsByTagName('lottie-player')[0];
+        if (lottiePlayer.classList.contains('is-animated')) return;
+        if (element.classList.contains('animate__pulse')) {
+            element.classList.remove(...['animate__animated', 'animate__pulse']);
+        }
+    }
+
+    setTimeout(() => {
+        let allLayerTitles = document.querySelectorAll('.layer-title');
+        console.log(allLayerTitles)
+        allLayerTitles[0].click()
+    }, 200);
 </script>
