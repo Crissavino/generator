@@ -1,5 +1,4 @@
 const { response } = require("express");
-const pool = require("../database");
 const fs = require('fs')
 const multer = require("multer");
 

@@ -3,6 +3,11 @@ const session = require('express-session');
 const morgan = require('morgan');
 const exphbs = require('express-handlebars');
 const path = require('path');
+require('dotenv').config()
+
+// DB config
+const { dbConnection } = require("../database/config");
+dbConnection();
 
 // initializations
 const app = express();

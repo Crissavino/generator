@@ -1,5 +1,4 @@
 const { response } = require("express");
-const pool = require("../database");
 
 const seeHomePage = async (req, res = response) => {
     const body = req.body;
