@@ -70,7 +70,7 @@ textarea#csvTextarea::placeholder {
     padding: 50px 20px;
     background-color: #FFFFFF;
     border-radius: 10px;
-    box-shadow: 4px 4px 7px #081760;
+    box-shadow: 0 0 20px #a4afe9;
 }
 
 .text-muted {
@@ -116,20 +116,24 @@ textarea#csvTextarea::placeholder {
     background-image: linear-gradient(#365ae1 0%, #244ae2 4.66%, #1029a6 76.69%, #1029a6 100%);
 }
 
-.next-button {
-    background-color: #1832B1;
-    color: #FFFFFF;
-    border-radius: 8px;
-    border-color: #1832B1;
-    height: 42px;
+.theme-btn.next-button {
+    /*background-color: #1832B1;*/
+    /*color: #FFFFFF;*/
+    /*border-radius: 8px;*/
+    /*border-color: #1832B1;*/
+    /*height: 42px;*/
     /*transition: left .5s;*/
     /*box-shadow: 4px 4px 10px #c1c7e4;*/
     box-shadow: 0 0 20px #a4afe9;
-    transition: transform 0.3s ease-in-out;
+    padding: 9px 18px;
+    /*transition: transform 0.3s ease-in-out;*/
 }
 
-.next-button:hover {
-    color: white;
+.theme-btn.back-button {
+    box-shadow: 0 0 20px #a4afe9;
+    background-image: linear-gradient(to right, #365ae1 0%, #6286eb 50%, #365ae1 100%);
+    /*background-image: linear-gradient(#365ae1 0%, #244ae2 4.66%, #1029a6 76.69%, #1029a6 100%);*/
+    padding: 9px 18px;
 }
 
 .address-container {}
@@ -179,20 +183,11 @@ textarea#csvTextarea::placeholder {
     text-align: left;
 }
 
-.btn-primary-custom {
-    background-color: #1832B1;
-    border-radius: 8px;
-    border-color: #1832B1;
-    height: 42px;
-    /*transition: left .5s;*/
-    color: #FFFFFF;
-    /*box-shadow: 4px 4px 10px #c1c7e4;*/
+.theme-btn.btn-primary-custom {
     box-shadow: 0 0 20px #a4afe9;
-    transition: transform 0.3s ease-in-out;
-}
-
-.btn-primary-custom:hover {
-    color: white;
+    padding: 9px;
+    font-size: 14px;
+    background-image: linear-gradient(to right, #365ae1 0%, #6286eb 50%, #365ae1 100%);
 }
 
 .variants-container {
@@ -229,6 +224,7 @@ textarea#csvTextarea::placeholder {
     border-radius: 10px;
     margin-bottom: 8px;
     cursor: pointer;
+    margin-top: 24px;
 
     display: flex;
     justify-content: space-between;

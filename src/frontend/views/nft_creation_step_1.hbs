@@ -41,6 +41,7 @@
             let folderStructure = file.webkitRelativePath.split('/');
             folderStructure.shift();
             folderStructure = folderStructure.join('/');
+            // TODO check error when upload a folder in Safari
             formData.append(`layersFolder-${userUuid}`, file);
         }
         formData.append(`userUuid`, userUuid);

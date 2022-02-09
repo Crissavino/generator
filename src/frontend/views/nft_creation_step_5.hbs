@@ -1,8 +1,8 @@
 <!-- ========================= hero-section start ========================= -->
 <section id="home" class="hero-section">
     <div class="container">
-        <div class="col-12 col-lg-8 p-3 mx-auto text-center">
-            <form id="fifthStepForm" action="{{ saveFifthStepUrl }}" method="post">
+        <div class="col-12 col-lg-8 p-3 mx-auto text-center big-white-modal">
+            <form id="fifthStepForm" class="mx-auto col-10" action="{{ saveFifthStepUrl }}" method="post">
 
                 {{#each layers}}
                     <div>
@@ -23,9 +23,9 @@
 
                         <div class="allocate-trait-container d-none white-modal">
                             <div class="titles-container mb-4">
-                                <h5 class="">
+                                <h6 class="">
                                     For the trait "{{ name }}" how many of each variant should be used?
-                                </h5>
+                                </h6>
                                 <p class="mb-2">
                                     This must add up to #{{ ../totalNFTToGenerate }}, the total number of NFTs you are
                                     generating.
@@ -38,12 +38,12 @@
                             <div class="buttons-to-allocate-container row justify-content-center">
                                 <button onclick="allocateTraitEvenly(`{{ name }}`, {{json
                                         files }}, {{ ../totalNFTToGenerate }})" type="button"
-                                        class="btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-9 col-lg-3">Allocate
+                                        class="btn theme-btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-9 col-lg-3">Allocate
                                     Evenly
                                 </button>
                                 <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json
                                         files }}, {{ ../totalNFTToGenerate }})" type="button"
-                                        class="btn btn-primary-custom col-9 col-lg-4">Paste from CSV or TSV
+                                        class="btn theme-btn btn-primary-custom col-9 col-lg-4">Paste from CSV or TSV
                                 </button>
                             </div>
 
@@ -55,7 +55,7 @@
                                             <span class="variant-name">{{ name }}</span>
                                         </div>
                                         <div class="col-4">
-                                            <input type="number" name="variant" id="variant"
+                                            <input type="number" name="{{ ../name }}-{{ name }}" id="variant-{{ ../name }}-{{ name }}"
                                                    oninput="changeVariantData(this, {{@key}}, {{ ../../totalNFTToGenerate }})"
                                                    class="variant-allocate-input-of-{{@key}} form-control custom">
                                         </div>
@@ -70,10 +70,12 @@
                     </div>
                 {{/each}}
 
+                <input type="text" name="layersWithVariants" id="layersWithVariants" class="d-none">
+
                 <div class="btn-container mt-4 mx-auto text-center">
                     <a href="{{ previousStepUrl }}" type="button" id="nextButton"
-                       class="btn text-white next-button mr-4">Back</a>
-                    <button type="submit" id="nextButton" class="btn text-white next-button">Next</button>
+                       class="btn text-white theme-btn back-button mr-4">Back</a>
+                    <button type="submit" id="nextButton" class="btn text-white theme-btn next-button">Next</button>
                 </div>
             </form>
         </div>
@@ -228,6 +230,75 @@
             element.classList.remove(...['animate__animated', 'animate__pulse']);
         }
     }
+
+    let fifthStepForm = document.getElementById('fifthStepForm');
+    function validateForm(entries) {
+        let formDataArray = [];
+        for (let [key, value] of entries) {
+            let layer = key.split('-')[0];
+            let trait = key.split('-')[1];
+            // if (value === '' || value === null || value === undefined) {
+            //     return {
+            //         status: false,
+            //         message: `You need to allocate number of variants for ${layer} layer in ${trait} trait.`
+            //     }
+            // }
+            formDataArray.push({
+                layerName: layer,
+                traitWithRarity: `${trait}#${value}`
+            });
+        }
+
+        return {
+            success: true,
+            formDataArray: formDataArray
+        }
+    }
+    fifthStepForm.addEventListener('submit', (e) => {
+        e.preventDefault()
+
+        let formData = new FormData(fifthStepForm);
+        let validate = this.validateForm(formData.entries());
+        if (!validate.success) {
+            Swal.fire({
+                width: 300,
+                position: 'bottom-end',
+                icon: 'error',
+                title: 'Oops...',
+                text: validate.message,
+            });
+            return;
+        }
+        console.log(validate.formDataArray)
+        formData.append('layersWithVariants', JSON.stringify(validate.formDataArray));
+        document.getElementById('layersWithVariants').setAttribute('value', "");
+        document.getElementById('layersWithVariants').setAttribute('value', JSON.stringify(validate.formDataArray));
+
+        fifthStepForm.submit();
+
+        // const options = {
+        //     method: 'POST',
+        //     body: formData,
+        // };
+        //
+        // fetch('/nft-creation/save-fifth-step', options)
+        //         .then(response => response.json())
+        //         .catch(error => console.error('Error:', error))
+        //         .then(response => {
+        //             if (response && response.success === false) {
+        //                 return Swal.fire({
+        //                     width: 300,
+        //                     position: 'bottom-end',
+        //                     icon: 'error',
+        //                     title: 'Oops...',
+        //                     text: response.message,
+        //                 });
+        //             }
+        //
+        //             console.log(response)
+        //         });
+
+    })
 
     setTimeout(() => {
         let allLayerTitles = document.querySelectorAll('.layer-title');

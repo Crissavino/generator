@@ -20,6 +20,7 @@ const storageForLayersFolder = multer.diskStorage({
         fs.chmodSync(`public/layers/${userUuid}/${folderStructure}`, 0o777);
 
         let path = `public/layers/${userUuid}/${folderStructure}`
+        console.log(path);
 
         cb(null, path)
     },
@@ -217,7 +218,7 @@ const saveSecondStep = async (req, res = response) => {
         const { imagesToGenerate } = req.body;
         let session = req.session;
         // TODO recover from database
-        session.totalNFTToGenerate = imagesToGenerate;
+        session.totalNFTToGenerate = imagesToGenerate ?? 1000;
         let userUuid = session.userUuid;
         const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
         let layers = getUserUploadedFolder(userUuid, mainFolderName);
@@ -312,8 +313,7 @@ const saveFourthStep = async (req, res = response) => {
     let userUuid = session.userUuid;
     const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
     let oldLayers = getUserUploadedFolder(userUuid, mainFolderName);
-    console.log(layersOrdered)
-    console.log('entra aca')
+    session.layersOrdered = layersOrdered;
     try {
         // TODO save data in DB
         res.redirect(`/nft-creation/fifth-step`)
@@ -330,23 +330,189 @@ const saveFourthStep = async (req, res = response) => {
 const seeFifthStep = async (req, res = response) => {
     const body = req.body;
     let session = req.session;
-    let userUuid = session.userUuid;
+    let userUuid = session.userUuid ?? '06k6c';
     if (!userUuid) {
         return res.redirect('/nft-creation/first-step')
     }
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-    // TODO get layers ordered from last step
-    let layers = getUserUploadedFolder(userUuid, mainFolderName);
-    console.log(layers)
+
+    let layers = session.layersOrdered ? JSON.parse(session.layersOrdered) : [
+        {
+            "index": 0,
+            "name": "Top lid",
+            "filesInside": 3,
+            "files": [
+                {
+                    "completeName": "High#30.png",
+                    "name": "High#30",
+                    "url": "/layers/al5h7/layers/Top lid/High#30.png"
+                },
+                {
+                    "completeName": "Low#20.png",
+                    "name": "Low#20",
+                    "url": "/layers/al5h7/layers/Top lid/Low#20.png"
+                },
+                {
+                    "completeName": "Middle#50.png",
+                    "name": "Middle#50",
+                    "url": "/layers/al5h7/layers/Top lid/Middle#50.png"
+                }
+            ],
+            "sortableIndex": "9or"
+        },
+        {
+            "index": 1,
+            "name": "Bottom lid",
+            "filesInside": 3,
+            "files": [
+                {
+                    "completeName": "High#20.png",
+                    "name": "High#20",
+                    "url": "/layers/al5h7/layers/Bottom lid/High#20.png"
+                },
+                {
+                    "completeName": "Low#40.png",
+                    "name": "Low#40",
+                    "url": "/layers/al5h7/layers/Bottom lid/Low#40.png"
+                },
+                {
+                    "completeName": "Middle#40.png",
+                    "name": "Middle#40",
+                    "url": "/layers/al5h7/layers/Bottom lid/Middle#40.png"
+                }
+            ],
+            "sortableIndex": "9xj"
+        },
+        {
+            "index": 2,
+            "name": "Eye color",
+            "filesInside": 6,
+            "files": [
+                {
+                    "completeName": "Cyan#1.png",
+                    "name": "Cyan#1",
+                    "url": "/layers/al5h7/layers/Eye color/Cyan#1.png"
+                },
+                {
+                    "completeName": "Green#1.png",
+                    "name": "Green#1",
+                    "url": "/layers/al5h7/layers/Eye color/Green#1.png"
+                },
+                {
+                    "completeName": "Pink#1.png",
+                    "name": "Pink#1",
+                    "url": "/layers/al5h7/layers/Eye color/Pink#1.png"
+                },
+                {
+                    "completeName": "Purple#1.png",
+                    "name": "Purple#1",
+                    "url": "/layers/al5h7/layers/Eye color/Purple#1.png"
+                },
+                {
+                    "completeName": "Red#1.png",
+                    "name": "Red#1",
+                    "url": "/layers/al5h7/layers/Eye color/Red#1.png"
+                },
+                {
+                    "completeName": "Yellow#10.png",
+                    "name": "Yellow#10",
+                    "url": "/layers/al5h7/layers/Eye color/Yellow#10.png"
+                }
+            ],
+            "sortableIndex": "9un"
+        },
+        {
+            "index": 3,
+            "name": "Goo",
+            "filesInside": 1,
+            "files": [
+                {
+                    "completeName": "Green#1.png",
+                    "name": "Green#1",
+                    "url": "/layers/al5h7/layers/Goo/Green#1.png"
+                }
+            ],
+            "sortableIndex": "9en"
+        },
+        {
+            "index": 4,
+            "name": "Iris",
+            "filesInside": 3,
+            "files": [
+                {
+                    "completeName": "Large#20.png",
+                    "name": "Large#20",
+                    "url": "/layers/al5h7/layers/Iris/Large#20.png"
+                },
+                {
+                    "completeName": "Medium#20.png",
+                    "name": "Medium#20",
+                    "url": "/layers/al5h7/layers/Iris/Medium#20.png"
+                },
+                {
+                    "completeName": "Small#60.png",
+                    "name": "Small#60",
+                    "url": "/layers/al5h7/layers/Iris/Small#60.png"
+                }
+            ],
+            "sortableIndex": "9hw"
+        },
+        {
+            "index": 5,
+            "name": "Eyeball",
+            "filesInside": 2,
+            "files": [
+                {
+                    "completeName": "Red#50.png",
+                    "name": "Red#50",
+                    "url": "/layers/al5h7/layers/Eyeball/Red#50.png"
+                },
+                {
+                    "completeName": "White#50.png",
+                    "name": "White#50",
+                    "url": "/layers/al5h7/layers/Eyeball/White#50.png"
+                }
+            ],
+            "sortableIndex": "9q0"
+        },
+        {
+            "index": 6,
+            "name": "Shine",
+            "filesInside": 1,
+            "files": [
+                {
+                    "completeName": "Shapes#100.png",
+                    "name": "Shapes#100",
+                    "url": "/layers/al5h7/layers/Shine/Shapes#100.png"
+                }
+            ],
+            "sortableIndex": "9kj"
+        },
+        {
+            "index": 7,
+            "name": "Background",
+            "filesInside": 1,
+            "files": [
+                {
+                    "completeName": "Black#1.png",
+                    "name": "Black#1",
+                    "url": "/layers/al5h7/layers/Background/Black#1.png"
+                }
+            ],
+            "sortableIndex": "9yu"
+        }
+    ];
+    layers.forEach((layer, i) => {
+        layer.index = i;
+    });
+
     try {
         res.render("nft_creation_step_5", {
             pageTitle: "Fifth Step",
-            mainFolderName,
             layers,
             saveFifthStepUrl: '/nft-creation/save-fifth-step',
             previousStepUrl: '/nft-creation/fourth-step',
-            totalNFTToGenerate: 10000
-            // totalNFTToGenerate: session.totalNFTToGenerate
+            // totalNFTToGenerate: 10000
+            totalNFTToGenerate: session.totalNFTToGenerate ?? 1000
         });
     } catch (error) {
         console.error(error);
@@ -355,7 +521,49 @@ const seeFifthStep = async (req, res = response) => {
             message: "Server error",
         });
     }
+}
 
+const saveFifthStep = async (req, res) => {
+    let { layersWithVariants } = req.body;
+    let session = req.session;
+    let userUuid = session.userUuid ?? '06k6c';
+    if (!userUuid) {
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            redirectTo: '/nft-creation/first-step'
+        });
+    }
+
+    try {
+        layersWithVariants = JSON.parse(layersWithVariants);
+        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+        layersWithVariants.map(layer => {
+            fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}`).forEach((folder, index) => {
+                if (folder === layer.layerName) {
+                    fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).map(file => {
+                        let fileExtension = file.split('.')[1];
+                        fs.renameSync(
+                            `public/layers/${userUuid}/${mainFolderName}/${folder}/${file}`,
+                            `public/layers/${userUuid}/${mainFolderName}/${folder}/${layer.traitWithRarity}.${fileExtension}`
+                        );
+                    })
+                }
+            });
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Todo bien",
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
 }
 
 module.exports = {
@@ -369,4 +577,5 @@ module.exports = {
     seeFourthStep,
     saveFourthStep,
     seeFifthStep,
+    saveFifthStep
 };

@@ -4,16 +4,15 @@
         <div class="col-12 col-lg-8 p-3 mx-auto big-white-modal">
             <form id="thirdStepForm" action="{{ saveThirdStepUrl }}" method="post">
                 <div class="col-10 col-lg-6 mt-5 mx-auto text-center">
-                    <label for="eachImageName">How should each image be named in the metadata?</label>
-                    <span id="eachImageNameText" class="text-muted">NAME #ID</span>
+                    <label for="collectionName">What is the name of this collection?</label>
                     <div class="mx-auto mt-3 col-8">
-                        <input id="eachImageName" type="text" class="form-control custom" oninput="changeEachImageName(this)" name="eachImageName">
+                        <input id="collectionName" type="text" class="form-control custom" name="collectionName">
                     </div>
                 </div>
 
                 <div class="col-10 col-lg-6 mt-5 mx-auto text-center">
                     <label for="collectionDescription">What is the description of your collection?</label>
-                    <span id="eachImageNameText" class="text-muted">
+                    <span class="text-muted">
                         The description will be the same for each image in the collection.
                     </span>
                     <div class="mx-auto mt-3">
@@ -22,9 +21,10 @@
                 </div>
 
                 <div class="col-10 col-lg-6 mt-5 mx-auto text-center">
-                    <label for="collectionName">What is the name of this collection?</label>
+                    <label for="eachImageName">How should each image be named in the metadata?</label>
+                    <span id="eachImageNameText" class="text-muted">NAME #ID</span>
                     <div class="mx-auto mt-3 col-8">
-                        <input id="collectionName" type="text" class="form-control custom" name="collectionName">
+                        <input id="eachImageName" type="text" class="form-control custom" oninput="changeEachImageName(this)" name="eachImageName">
                     </div>
                 </div>
 
@@ -52,7 +52,7 @@
                 <div class="col-10 col-lg-6 mt-5 mx-auto text-center">
                     <label for="secondRoyalties">How many royalties should creators receive for secondary sales, in percent?</label>
                     <span class="text-muted">
-                        The royalties will be distributed to each creator, as determined below.
+                        The royalties get distributed to each creator, as determined below.
                     </span>
                     <div class="mx-auto mt-3 col-8">
                         <input id="secondRoyalties" type="number" min="0" max="100" class="form-control custom" name="secondRoyalties" placeholder="%">
@@ -62,7 +62,8 @@
                 <div class="col-12 col-lg-8 mt-5 mx-auto text-center">
                     <p class="mb-0">How should the royalties be split?</p>
                     <span class="text-muted">
-                        The royalties will be distributed to each creator, as determined below.
+                        For secondary sales, the royalties are distributed to each creator, as determined below.
+                        Percentages should add up to 100%.
                     </span>
                     <div class="address-container">
                         <div class="row justify-content-center address-1">
@@ -86,8 +87,8 @@
                 </div>
 
                 <div class="btn-container mt-4 mx-auto text-center">
-                    <a href="{{ previousStepUrl }}" type="button" id="nextButton" class="btn text-white next-button mr-4">Back</a>
-                    <button type="submit" id="nextButton" class="btn text-white next-button">Next</button>
+                    <a href="{{ previousStepUrl }}" type="button" id="nextButton" class="btn text-white theme-btn back-button mr-4">Back</a>
+                    <button type="submit" id="nextButton" class="btn text-white theme-btn next-button">Next</button>
                 </div>
             </form>
         </div>
