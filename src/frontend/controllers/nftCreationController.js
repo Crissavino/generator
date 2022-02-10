@@ -1,6 +1,15 @@
-const { response } = require("express");
+const {response} = require("express");
 const fs = require('fs')
 const multer = require("multer");
+const mongoose = require("mongoose");
+const User = require('../../models/User');
+const Project = require('../../models/Project');
+const Blockchain = require('../../models/Blockchain');
+const NftCollection = require('../../models/NftCollection');
+const SplitRoyalty = require('../../models/SplitRoyalty');
+const Layer = require('../../models/Layer');
+const Variant = require('../../models/Variant');
+const {ObjectId} = require("mongodb");
 
 const storageForLayersFolder = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -13,9 +22,9 @@ const storageForLayersFolder = multer.diskStorage({
         folderStructure.pop();
         folderStructure = folderStructure.join('/');
 
-        fs.mkdirSync(`public/layers/${userUuid}`, { recursive: true });
+        fs.mkdirSync(`public/layers/${userUuid}`, {recursive: true});
         fs.chmodSync(`public/layers/${userUuid}`, 0o777);
-        fs.mkdirSync(`public/layers/${userUuid}/${folderStructure}`, { recursive: true });
+        fs.mkdirSync(`public/layers/${userUuid}/${folderStructure}`, {recursive: true});
         fs.chmodSync(`public/layers/${userUuid}/${folderStructure}`, 0o777);
 
         let path = `public/layers/${userUuid}/${folderStructure}`
@@ -42,9 +51,9 @@ const storageForReplaceLayersFolder = multer.diskStorage({
         folderStructure.pop();
         folderStructure = folderStructure.join('/');
 
-        fs.mkdirSync(`public/layers/${userUuid}`, { recursive: true });
+        fs.mkdirSync(`public/layers/${userUuid}`, {recursive: true});
         fs.chmodSync(`public/layers/${userUuid}`, 0o777);
-        fs.mkdirSync(`public/layers/${userUuid}/${folderStructure}`, { recursive: true });
+        fs.mkdirSync(`public/layers/${userUuid}/${folderStructure}`, {recursive: true});
         fs.chmodSync(`public/layers/${userUuid}/${folderStructure}`, 0o777);
 
         let path = `public/layers/${userUuid}/${folderStructure}`
@@ -59,7 +68,7 @@ const storageForReplaceLayersFolder = multer.diskStorage({
     }
 })
 
-function fileFilter (req, file, cb) {
+function fileFilter(req, file, cb) {
     if (
         file.mimetype !== 'image/jpeg' &&
         file.mimetype !== 'image/png' &&
@@ -87,7 +96,8 @@ let replacingLayersFolder = multer({
 }).any();
 
 const seeFirstStep = async (req, res = response) => {
-    const body = req.body;
+    if (req.session.userUuid && !req.session.projectId) return res.redirect('/nft-creation/second-step');
+    if (req.session.userUuid && req.session.projectId) return res.redirect('/nft-creation/third-step');
     try {
         res.render("nft_creation_step_1", {
             pageTitle: "First Step",
@@ -103,9 +113,15 @@ const seeFirstStep = async (req, res = response) => {
 
 }
 
+async function findUserByUUid(userUuid) {
+    return await User.findOne({
+        uuid: userUuid
+    }).exec() ?? null;
+}
+
 const postLayersFolder = async (req, res = response) => {
     try {
-        uploadLayersFolder(req, res, function (err) {
+        uploadLayersFolder(req, res, async function (err) {
             if (err) {
                 console.log(err)
                 res.status(500).json({
@@ -115,7 +131,25 @@ const postLayersFolder = async (req, res = response) => {
             }
 
             let session = req.session;
-            session.userUuid = req.body.userUuid;
+            let userUuid = req.body.userUuid;
+            session.userUuid = userUuid;
+            // TODO see real case
+            let user = await findUserByUUid(userUuid)
+            if (!user) {
+                let user = new User({
+                    uuid: userUuid
+                });
+
+                await User.create(user, (err, user) => {
+                    if (err) {
+                        console.log(err);
+                        return res.status(500).json({
+                            success: false,
+                            message: "Server error",
+                        });
+                    }
+                });
+            }
 
             res.status(200).json({
                 success: true,
@@ -138,6 +172,7 @@ function getUserUploadedFolder(userUuid, mainFolderName) {
         layers.push({
             index,
             name: folder,
+            path: `public/layers/${userUuid}/${mainFolderName}/${folder}`,
             filesInside: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).length,
             files: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).map(file => {
                 return {
@@ -153,7 +188,6 @@ function getUserUploadedFolder(userUuid, mainFolderName) {
 }
 
 const seeSecondStep = async (req, res = response) => {
-    const body = req.body;
     let session = req.session;
     let userUuid = session.userUuid;
     if (!userUuid) {
@@ -186,7 +220,7 @@ const replaceLayersFolder = async (req, res = response) => {
         //remove older folder
         fs.readdirSync(`public/layers/${userUuid}`).forEach(folder => {
             console.log(folder)
-            fs.rmdirSync(`public/layers/${userUuid}/${folder}`, { recursive: true });
+            fs.rmdirSync(`public/layers/${userUuid}/${folder}`, {recursive: true});
         })
 
         replacingLayersFolder(req, res, function (err) {
@@ -200,7 +234,7 @@ const replaceLayersFolder = async (req, res = response) => {
 
             res.status(200).json({
                 success: true,
-                message: "All files updated",
+                message: "New layer folder updated",
             });
         });
     } catch (error) {
@@ -212,17 +246,59 @@ const replaceLayersFolder = async (req, res = response) => {
     }
 }
 
+async function findBlockchainByName(name) {
+    if (name === 'solBlockchain') name = 'Solana'
+    if (name === 'ethBlockchain') name = 'Ethereum'
+    return await Blockchain.findOne({
+        name
+    }).exec() ?? null;
+}
+
 const saveSecondStep = async (req, res = response) => {
     try {
-        const { imagesToGenerate } = req.body;
+        const {imagesToGenerate, projectName, blockchainSelectedValue} = req.body;
         let session = req.session;
-        // TODO recover from database
-        session.totalNFTToGenerate = imagesToGenerate ?? 1000;
+        session.totalNFTToGenerate = imagesToGenerate;
         let userUuid = session.userUuid;
-        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-        let layers = getUserUploadedFolder(userUuid, mainFolderName);
+        if (!userUuid) {
+            // no user found flash alert
+            return res.redirect('/nft-creation/first-step')
+        }
+        let user = await findUserByUUid(session.userUuid);
+        if (!user) {
+            // TODO show flash alert
+            // no user found
+            return res.redirect('/nft-creation/first-step')
+        }
         // TODO save data in DB
-        res.redirect(`/nft-creation/third-step`)
+        let blockchain = await findBlockchainByName(blockchainSelectedValue);
+        if (!blockchain) {
+            // TODO show flash alert
+            // no blockchain found
+            return res.redirect('/nft-creation/second-step')
+        }
+        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+        let project = new Project({
+            blockchain: blockchain,
+            user: user,
+            name: projectName,
+            numberToGenerate: imagesToGenerate,
+            layersFolderPath: `public/layers/${userUuid}/${mainFolderName}`
+        });
+        await Project.create(project, (err, project) => {
+            console.log(project)
+            if (err) {
+                console.log(err);
+                return res.status(500).json({
+                    success: false,
+                    message: "Server error",
+                });
+            }
+
+            session.projectId = project._id;
+
+            res.redirect(`/nft-creation/third-step`)
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -233,20 +309,30 @@ const saveSecondStep = async (req, res = response) => {
 
 }
 
+async function findProjectsOfUser(user) {
+    return await Project.find({
+        user
+    }).exec() ?? null;
+}
+
+async function findProjectById(projectId) {
+    return await Project.findById(projectId).exec() ?? null;
+}
+
 const seeThirdStep = async (req, res = response) => {
-    const body = req.body;
     let session = req.session;
-    let userUuid = session.userUuid;
-    if (!userUuid) {
+    if (!session.userUuid) {
+        // no userUuid found flash alert
         return res.redirect('/nft-creation/first-step')
     }
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    if (!session.projectId) {
+        // TODO show flash alert
+        // no project found
+        return res.redirect('/nft-creation/second-step')
+    }
     try {
         res.render("nft_creation_step_3", {
             pageTitle: "Fourth Step",
-            mainFolderName,
-            layers,
             saveThirdStepUrl: '/nft-creation/save-third-step',
             previousStepUrl: '/nft-creation/second-step'
         });
@@ -260,38 +346,163 @@ const seeThirdStep = async (req, res = response) => {
 
 }
 
+function getSplitRoyalties(body) {
+    let splitRoyalties = [];
+    let totalPercent = 0;
+    let allWalletsKeys = Object.getOwnPropertyNames(body).filter(key => key.includes('wallet-'));
+    // let allPercentageKeys = Object.getOwnPropertyNames(body).filter(key => key.includes('percentage-'));
+    // get all wallet- and percentage- from body
+    allWalletsKeys.forEach(key => {
+        let wallet_address = body[key];
+        let percent = body[`percent-${key.split('-')[1]}`];
+        if (wallet_address && percent) {
+            splitRoyalties.push({
+                wallet_address,
+                percent
+            });
+            totalPercent += parseInt(percent);
+        }
+    });
+
+    return {
+        splitRoyalties,
+        totalPercent
+    };
+}
+
 const saveThirdStep = async (req, res = response) => {
-    const body = req.body;
+    const {
+        collectionName,
+        collectionDescription,
+        eachImageName,
+        collectionFamily,
+        collectionSymbol,
+        collectionExternalUrl,
+        secondRoyalties
+    } = req.body;
     let session = req.session;
     let userUuid = session.userUuid;
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    if (!userUuid) {
+        // no userUuid found flash alert
+        return res.redirect('/nft-creation/first-step')
+    }
+    let projectId = session.projectId;
+    if (!projectId) {
+        // TODO show flash alert
+        // no project found
+        return res.redirect('/nft-creation/second-step')
+    }
+    let {splitRoyalties, totalPercent} = getSplitRoyalties(req.body);
+    if (totalPercent !== 100) {
+        // TODO show flash alert
+        // total percent is not 100
+        return res.redirect('/nft-creation/third-step')
+    }
     try {
-        // TODO save data in DB
-        res.redirect(`/nft-creation/fourth-step`)
+        let nftCollection = new NftCollection({
+            project: projectId,
+            name: collectionName,
+            description: collectionDescription,
+            images_name: eachImageName,
+            family: collectionFamily,
+            symbol: collectionSymbol,
+            externalUrl: collectionExternalUrl,
+            royaltiesForSecondarySales: secondRoyalties,
+        });
+        await NftCollection.create(nftCollection, async (err, nftCollection) => {
+            if (err) {
+                console.log(err);
+                // TODO show flash alert
+                // saving error
+                return res.redirect('/nft-creation/third-step')
+            }
+
+            session.nftCollectionId = nftCollection._id;
+
+            for (const splitRoyaltyKey in splitRoyalties) {
+                if (splitRoyalties.hasOwnProperty(splitRoyaltyKey)) {
+                    let royalty = new SplitRoyalty({
+                        nftCollection: nftCollection._id,
+                        walletAddress: splitRoyalties[splitRoyaltyKey].wallet_address,
+                        percent: splitRoyalties[splitRoyaltyKey].percent
+                    });
+                    await SplitRoyalty.create(royalty, (err, royalty) => {
+                        if (err) {
+                            console.log(err);
+                            // TODO show flash alert
+                            // saving error
+                            return res.redirect('/nft-creation/third-step')
+                        }
+                    });
+                }
+            }
+
+            const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+            let layers = getUserUploadedFolder(userUuid, mainFolderName);
+            for (const layersKey in layers) {
+                if (layers.hasOwnProperty(layersKey)) {
+                    let layer = new Layer({
+                        nftCollection: nftCollection._id,
+                        name: layers[layersKey].name,
+                        path: layers[layersKey].path,
+                        variantsNumber: layers[layersKey].filesInside,
+                        position: layers[layersKey].index,
+                    });
+
+                    await Layer.create(layer, (err, layer) => {
+                        if (err) {
+                            console.log(err);
+                            // TODO show flash alert
+                            // saving error
+                            return res.redirect('/nft-creation/third-step')
+                        }
+                    });
+                }
+            }
+            res.redirect(`/nft-creation/fourth-step`)
+        });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
+        // TODO show flash alert
+        // saving error
+        return res.redirect('/nft-creation/third-step')
     }
 
 }
 
+async function findLayersByNftCollectionIdWithLean(nftCollectionId) {
+    return await Layer.find({nftCollection: nftCollectionId}).lean().sort({
+        position: "asc"
+    }).exec();
+}
+
+async function findLayersByNftCollectionId(nftCollectionId) {
+    return await Layer.find({nftCollection: nftCollectionId}).exec();
+}
+
 const seeFourthStep = async (req, res = response) => {
-    const body = req.body;
     let session = req.session;
     let userUuid = session.userUuid;
     if (!userUuid) {
+        // no userUuid found flash alert
         return res.redirect('/nft-creation/first-step')
     }
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-    let layers = getUserUploadedFolder(userUuid, mainFolderName);
+    if (!session.projectId) {
+        // TODO show flash alert
+        // no project found
+        return res.redirect('/nft-creation/second-step')
+    }
+    let nftCollectionId = session.nftCollectionId;
+    if (!session.nftCollectionId){
+        // TODO show flash alert
+        // no nftCollectionId found
+        return res.redirect('/nft-creation/third-step');
+    }
+    // get all layers from nftCollectionId
+    let layers = await findLayersByNftCollectionIdWithLean(nftCollectionId);
     try {
         res.render("nft_creation_step_4", {
             pageTitle: "Fourth Step",
-            mainFolderName,
             layers,
             saveFourthStepUrl: '/nft-creation/save-fourth-step',
             previousStepUrl: '/nft-creation/third-step'
@@ -307,14 +518,24 @@ const seeFourthStep = async (req, res = response) => {
 }
 
 const saveFourthStep = async (req, res = response) => {
-    const { layersOrdered } = req.body;
+    let {layersOrdered} = req.body;
     let session = req.session;
-    let userUuid = session.userUuid;
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-    let oldLayers = getUserUploadedFolder(userUuid, mainFolderName);
     session.layersOrdered = layersOrdered;
+    layersOrdered = JSON.parse(layersOrdered);
     try {
-        // TODO save data in DB
+        for (const layersOrderedKey in layersOrdered) {
+            if (layersOrdered.hasOwnProperty(layersOrderedKey)) {
+                let layerOrdered = layersOrdered[layersOrderedKey];
+                await Layer.findByIdAndUpdate(layerOrdered._id, {position: layersOrderedKey}, null, (err, layer) => {
+                    if (err) {
+                        console.log(err);
+                        // TODO show flash alert
+                        // no saving error
+                        return res.redirect('/nft-creation/fourth-step');
+                    }
+                }).clone();
+            }
+        }
         res.redirect(`/nft-creation/fifth-step`)
     } catch (error) {
         console.error(error);
@@ -323,186 +544,51 @@ const saveFourthStep = async (req, res = response) => {
             message: "Server error",
         });
     }
+}
 
+function attachVariantsFiles(layers) {
+    layers.forEach(layer => {
+        layer.filesInside = fs.readdirSync(`${layer.path}`).length;
+        layer.files = fs.readdirSync(`${layer.path}`).map(file => {
+            // remove the first element of the path
+            let path = layer.path.split('/');
+            path.shift();
+            path = path.join('/');
+
+            return {
+                completeName: file,
+                name: file.split('.')[0],
+                url: `${path}/${file}`
+            }
+        });
+    });
+
+    return layers
 }
 
 const seeFifthStep = async (req, res = response) => {
-    const body = req.body;
     let session = req.session;
     let userUuid = session.userUuid ?? '06k6c';
     if (!userUuid) {
+        // TODO show flash alert
+        // no userUuid found flash alert
         return res.redirect('/nft-creation/first-step')
     }
-
-    let layers = session.layersOrdered ? JSON.parse(session.layersOrdered) : [
-        {
-            "index": 0,
-            "name": "Top lid",
-            "filesInside": 3,
-            "files": [
-                {
-                    "completeName": "High#30.png",
-                    "name": "High#30",
-                    "url": "/layers/al5h7/layers/Top lid/High#30.png"
-                },
-                {
-                    "completeName": "Low#20.png",
-                    "name": "Low#20",
-                    "url": "/layers/al5h7/layers/Top lid/Low#20.png"
-                },
-                {
-                    "completeName": "Middle#50.png",
-                    "name": "Middle#50",
-                    "url": "/layers/al5h7/layers/Top lid/Middle#50.png"
-                }
-            ],
-            "sortableIndex": "9or"
-        },
-        {
-            "index": 1,
-            "name": "Bottom lid",
-            "filesInside": 3,
-            "files": [
-                {
-                    "completeName": "High#20.png",
-                    "name": "High#20",
-                    "url": "/layers/al5h7/layers/Bottom lid/High#20.png"
-                },
-                {
-                    "completeName": "Low#40.png",
-                    "name": "Low#40",
-                    "url": "/layers/al5h7/layers/Bottom lid/Low#40.png"
-                },
-                {
-                    "completeName": "Middle#40.png",
-                    "name": "Middle#40",
-                    "url": "/layers/al5h7/layers/Bottom lid/Middle#40.png"
-                }
-            ],
-            "sortableIndex": "9xj"
-        },
-        {
-            "index": 2,
-            "name": "Eye color",
-            "filesInside": 6,
-            "files": [
-                {
-                    "completeName": "Cyan#1.png",
-                    "name": "Cyan#1",
-                    "url": "/layers/al5h7/layers/Eye color/Cyan#1.png"
-                },
-                {
-                    "completeName": "Green#1.png",
-                    "name": "Green#1",
-                    "url": "/layers/al5h7/layers/Eye color/Green#1.png"
-                },
-                {
-                    "completeName": "Pink#1.png",
-                    "name": "Pink#1",
-                    "url": "/layers/al5h7/layers/Eye color/Pink#1.png"
-                },
-                {
-                    "completeName": "Purple#1.png",
-                    "name": "Purple#1",
-                    "url": "/layers/al5h7/layers/Eye color/Purple#1.png"
-                },
-                {
-                    "completeName": "Red#1.png",
-                    "name": "Red#1",
-                    "url": "/layers/al5h7/layers/Eye color/Red#1.png"
-                },
-                {
-                    "completeName": "Yellow#10.png",
-                    "name": "Yellow#10",
-                    "url": "/layers/al5h7/layers/Eye color/Yellow#10.png"
-                }
-            ],
-            "sortableIndex": "9un"
-        },
-        {
-            "index": 3,
-            "name": "Goo",
-            "filesInside": 1,
-            "files": [
-                {
-                    "completeName": "Green#1.png",
-                    "name": "Green#1",
-                    "url": "/layers/al5h7/layers/Goo/Green#1.png"
-                }
-            ],
-            "sortableIndex": "9en"
-        },
-        {
-            "index": 4,
-            "name": "Iris",
-            "filesInside": 3,
-            "files": [
-                {
-                    "completeName": "Large#20.png",
-                    "name": "Large#20",
-                    "url": "/layers/al5h7/layers/Iris/Large#20.png"
-                },
-                {
-                    "completeName": "Medium#20.png",
-                    "name": "Medium#20",
-                    "url": "/layers/al5h7/layers/Iris/Medium#20.png"
-                },
-                {
-                    "completeName": "Small#60.png",
-                    "name": "Small#60",
-                    "url": "/layers/al5h7/layers/Iris/Small#60.png"
-                }
-            ],
-            "sortableIndex": "9hw"
-        },
-        {
-            "index": 5,
-            "name": "Eyeball",
-            "filesInside": 2,
-            "files": [
-                {
-                    "completeName": "Red#50.png",
-                    "name": "Red#50",
-                    "url": "/layers/al5h7/layers/Eyeball/Red#50.png"
-                },
-                {
-                    "completeName": "White#50.png",
-                    "name": "White#50",
-                    "url": "/layers/al5h7/layers/Eyeball/White#50.png"
-                }
-            ],
-            "sortableIndex": "9q0"
-        },
-        {
-            "index": 6,
-            "name": "Shine",
-            "filesInside": 1,
-            "files": [
-                {
-                    "completeName": "Shapes#100.png",
-                    "name": "Shapes#100",
-                    "url": "/layers/al5h7/layers/Shine/Shapes#100.png"
-                }
-            ],
-            "sortableIndex": "9kj"
-        },
-        {
-            "index": 7,
-            "name": "Background",
-            "filesInside": 1,
-            "files": [
-                {
-                    "completeName": "Black#1.png",
-                    "name": "Black#1",
-                    "url": "/layers/al5h7/layers/Background/Black#1.png"
-                }
-            ],
-            "sortableIndex": "9yu"
-        }
-    ];
-    layers.forEach((layer, i) => {
-        layer.index = i;
-    });
+    let projectId = session.projectId;
+    if (!projectId) {
+        // TODO show flash alert
+        // no project found
+        return res.redirect('/nft-creation/second-step')
+    }
+    let nftCollectionId = session.nftCollectionId;
+    if (!nftCollectionId) {
+        // TODO show flash alert
+        // no nftCollectionId found
+        return res.redirect('/nft-creation/third-step');
+    }
+    let project = await Project.findById(projectId).exec();
+    let layers = await findLayersByNftCollectionIdWithLean(nftCollectionId);
+    layers = attachVariantsFiles(layers);
 
     try {
         res.render("nft_creation_step_5", {
@@ -510,8 +596,7 @@ const seeFifthStep = async (req, res = response) => {
             layers,
             saveFifthStepUrl: '/nft-creation/save-fifth-step',
             previousStepUrl: '/nft-creation/fourth-step',
-            // totalNFTToGenerate: 10000
-            totalNFTToGenerate: session.totalNFTToGenerate ?? 1000
+            totalNFTToGenerate: project.numberToGenerate
         });
     } catch (error) {
         console.error(error);
@@ -523,33 +608,89 @@ const seeFifthStep = async (req, res = response) => {
 }
 
 const saveFifthStep = async (req, res) => {
-    let { layersWithVariants } = req.body;
+    let {variantsToAllocate} = req.body;
     let session = req.session;
-    let userUuid = session.userUuid ?? '06k6c';
+    let userUuid = session.userUuid;
     if (!userUuid) {
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-            redirectTo: '/nft-creation/first-step'
-        });
+        // TODO show flash alert
+        // no userUuid found flash alert
+        return res.redirect('/nft-creation/first-step')
+    }
+    let projectId = session.projectId;
+    if (!projectId) {
+        // TODO show flash alert
+        // no project found
+        return res.redirect('/nft-creation/second-step')
+    }
+    let nftCollectionId = session.nftCollectionId;
+    if (!nftCollectionId) {
+        // TODO show flash alert
+        // no nftCollectionId found
+        return res.redirect('/nft-creation/third-step');
     }
 
     try {
-        layersWithVariants = JSON.parse(layersWithVariants);
-        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
-        layersWithVariants.map(layer => {
-            fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}`).forEach((folder, index) => {
-                if (folder === layer.layerName) {
-                    fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).map(file => {
-                        let fileExtension = file.split('.')[1];
-                        fs.renameSync(
-                            `public/layers/${userUuid}/${mainFolderName}/${folder}/${file}`,
-                            `public/layers/${userUuid}/${mainFolderName}/${folder}/${layer.traitWithRarity}.${fileExtension}`
-                        );
-                    })
-                }
-            });
+        variantsToAllocate = JSON.parse(variantsToAllocate);
+
+        // group variants by layerName
+        let variantsGroupedByLayers = [];
+        variantsToAllocate.forEach(variant => {
+            let layerId = variant.layerId;
+            let layerName = variant.layerName;
+            let variantName = variant.traitName;
+            let variantNumber = variant.variantNumber;
+            let traitWithRarity = variant.traitWithRarity;
+            let variantToAdd = {
+                layer: layerId,
+                layerName: layerName,
+                variantName: variantName,
+                variantNumber: variantNumber,
+                traitWithRarity: traitWithRarity
+            };
+            if (variantsGroupedByLayers[layerName]) {
+                variantsGroupedByLayers[layerName].push(variantToAdd);
+            } else {
+                variantsGroupedByLayers[layerName] = [variantToAdd];
+            }
         });
+
+        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+
+        for (const variantsGroupedByLayersKey in variantsGroupedByLayers) {
+            if (variantsGroupedByLayers.hasOwnProperty(variantsGroupedByLayersKey)) {
+                const layerFolder = variantsGroupedByLayersKey;
+                const variants = variantsGroupedByLayers[layerFolder];
+                fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${layerFolder}`).forEach((file, index) => {
+                    let fileName = file.split('.')[0];
+                    let fileExtension = file.split('.')[1];
+                    variants.map(async variant => {
+                        if (variant.variantName === fileName) {
+                            fs.renameSync(
+                                `public/layers/${userUuid}/${mainFolderName}/${layerFolder}/${file}`,
+                                `public/layers/${userUuid}/${mainFolderName}/${layerFolder}/${variant.traitWithRarity}.${fileExtension}`
+                            );
+
+                            let variantToSave = new Variant({
+                                layer: mongoose.Types.ObjectId(variant.layer),
+                                name: variant.traitName,
+                                fileName: `${variant.traitWithRarity}.${fileExtension}`,
+                                filePath: `public/layers/${userUuid}/${mainFolderName}/${layerFolder}/${variant.traitWithRarity}.${fileExtension}`,
+                                variantNumber: variant.variantNumber
+                            });
+                            await Variant.create(variantToSave, (err, variantSaved) => {
+                                console.log(variantSaved)
+                                if (err) {
+                                    console.error(err);
+                                    // TODO show flash alert
+                                    // error saving variant
+                                    return res.redirect('/nft-creation/fifth-step');
+                                }
+                            });
+                        }
+                    });
+                })
+            }
+        }
 
         return res.status(200).json({
             success: true,

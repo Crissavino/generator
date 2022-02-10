@@ -1,5 +1,7 @@
 const express = require('express');
+const redis   = require("redis");
 const session = require('express-session');
+let RedisStore = require("connect-redis")(session)
 const morgan = require('morgan');
 const exphbs = require('express-handlebars');
 const path = require('path');
@@ -25,7 +27,16 @@ app.engine('.hbs', exphbs.engine({
 app.set('view engine', '.hbs');
 
 // middlewares
-app.use(session({secret: 'secret!!',saveUninitialized: true, resave: true}));
+let redisClient = redis.createClient({ legacyMode: true })
+redisClient.connect().catch(console.error)
+app.use(session({
+    secret: 'secret!!',
+    // create new redis store.
+    store: new RedisStore({ host: 'localhost', port: 6379, client: redisClient,ttl :  260}),
+    saveUninitialized: true,
+    resave: false
+}));
+// app.use(session({secret: 'secret!!',saveUninitialized: true, resave: true}));
 app.use(morgan('dev'));
 // para no enviar ni recibir imagenes
 app.use(express.urlencoded({ extended: true }));

@@ -1,13 +1,16 @@
 const { Schema, model } = require("mongoose");
-const CollectionSchema = require("./Collection");
 
 const SplitRoyaltySchema = new Schema({
-    collection: CollectionSchema,
+    nftCollection: {
+        type: Schema.Types.ObjectId,
+        ref: "NftCollection",
+        required: true
+    },
     walletAddress: {
         type: String,
         require: true,
     },
-    percentage: {
+    percent: {
         type: Number,
         require: true,
     },

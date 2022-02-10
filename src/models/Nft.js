@@ -1,8 +1,11 @@
 const {Schema, model} = require("mongoose");
-const CollectionSchema = require("./Collection");
 
 const NftSchema = new Schema({
-    collection: CollectionSchema,
+    collection: {
+        type: Schema.Types.ObjectId,
+        ref: "Collection",
+        required: true
+    },
     name: {
         type: String,
         require: true,

@@ -1,16 +1,26 @@
 const { Schema, model } = require("mongoose");
-const UserSchema = require("./User");
-const Blockchain = require("./Blockchain");
 
 const ProjectSchema = new Schema({
-    blockchain: Blockchain,
-    user: UserSchema,
+    blockchain: {
+        type: Schema.Types.ObjectId,
+        ref: "Blockchain",
+        required: true
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
     name: {
         type: String,
         require: true,
     },
     numberToGenerate: {
         type: Number,
+        require: true,
+    },
+    layersFolderPath: {
+        type: String,
         require: true,
     },
 }, {

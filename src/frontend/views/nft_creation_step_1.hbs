@@ -33,7 +33,10 @@
 
     function layersFolderUploaded(input) {
 
-        let userUuid = Math.random().toString(36).substring(7);
+        let userUuid = localStorage.getItem('userUuid');
+        if (!userUuid) {
+            userUuid = Math.random().toString(36).substring(7);
+        }
         localStorage.setItem('userUuid', userUuid);
 
         let formData = new FormData();
@@ -55,7 +58,9 @@
             .then(response => response.json())
             .catch(error => console.error('Error:', error))
             .then(response => {
+                console.log(response)
                 if (response && response.success === false) {
+                    localStorage.removeItem('userUuid');
                     return errorMessage(response.message);
                 }
 

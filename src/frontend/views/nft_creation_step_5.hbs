@@ -55,7 +55,7 @@
                                             <span class="variant-name">{{ name }}</span>
                                         </div>
                                         <div class="col-4">
-                                            <input type="number" name="{{ ../name }}-{{ name }}" id="variant-{{ ../name }}-{{ name }}"
+                                            <input type="number" name="{{ ../name }}-{{ name }}-{{ ../_id }}" id="variant-{{ ../name }}-{{ name }}"
                                                    oninput="changeVariantData(this, {{@key}}, {{ ../../totalNFTToGenerate }})"
                                                    class="variant-allocate-input-of-{{@key}} form-control custom">
                                         </div>
@@ -70,7 +70,7 @@
                     </div>
                 {{/each}}
 
-                <input type="text" name="layersWithVariants" id="layersWithVariants" class="d-none">
+                <input type="text" name="variantsToAllocate" id="variantsToAllocate" class="d-none">
 
                 <div class="btn-container mt-4 mx-auto text-center">
                     <a href="{{ previousStepUrl }}" type="button" id="nextButton"
@@ -160,7 +160,7 @@
         if (variantInput.value === '' || variantInput.value === undefined || variantInput.value === 0) {
             variantPercentSpan.innerText = '0%';
         } else {
-            variantPercentSpan.innerText = `${Math.round((parseInt(variantInput.value) + Number.EPSILON) * 100) / totalNftToGenerate}%`;
+            variantPercentSpan.innerText = `${Math.round(Math.round((parseInt(variantInput.value) + Number.EPSILON) * 100) / totalNftToGenerate)}%`;
         }
 
         let allVariantInput = variantInput.parentElement.parentElement.parentElement.querySelectorAll('[class^="variant-allocate-input-of-"]');
@@ -234,9 +234,12 @@
     let fifthStepForm = document.getElementById('fifthStepForm');
     function validateForm(entries) {
         let formDataArray = [];
+        console.log(entries)
         for (let [key, value] of entries) {
-            let layer = key.split('-')[0];
+            let layerName = key.split('-')[0];
+            if (layerName === 'variantsToAllocate') continue;
             let trait = key.split('-')[1];
+            let layerId = key.split('-')[2];
             // if (value === '' || value === null || value === undefined) {
             //     return {
             //         status: false,
@@ -244,8 +247,11 @@
             //     }
             // }
             formDataArray.push({
-                layerName: layer,
-                traitWithRarity: `${trait}#${value}`
+                layerId: layerId,
+                layerName: layerName,
+                traitName: `${trait}`,
+                traitWithRarity: `${trait}#${value}`,
+                variantNumber: `${value}`,
             });
         }
 
@@ -269,35 +275,10 @@
             });
             return;
         }
-        console.log(validate.formDataArray)
-        formData.append('layersWithVariants', JSON.stringify(validate.formDataArray));
-        document.getElementById('layersWithVariants').setAttribute('value', "");
-        document.getElementById('layersWithVariants').setAttribute('value', JSON.stringify(validate.formDataArray));
+        document.getElementById('variantsToAllocate').setAttribute('value', "");
+        document.getElementById('variantsToAllocate').setAttribute('value', JSON.stringify(validate.formDataArray));
 
         fifthStepForm.submit();
-
-        // const options = {
-        //     method: 'POST',
-        //     body: formData,
-        // };
-        //
-        // fetch('/nft-creation/save-fifth-step', options)
-        //         .then(response => response.json())
-        //         .catch(error => console.error('Error:', error))
-        //         .then(response => {
-        //             if (response && response.success === false) {
-        //                 return Swal.fire({
-        //                     width: 300,
-        //                     position: 'bottom-end',
-        //                     icon: 'error',
-        //                     title: 'Oops...',
-        //                     text: response.message,
-        //                 });
-        //             }
-        //
-        //             console.log(response)
-        //         });
-
     })
 
     setTimeout(() => {

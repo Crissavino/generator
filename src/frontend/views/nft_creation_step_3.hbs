@@ -110,10 +110,14 @@
     function addAnotherWalletAddress() {
         let addressContainer = document.querySelector('.address-container');
         let numberOfNewAddress = addressContainer.children.length + 1;
+        let addressClass = `address-${numberOfNewAddress}`;
         let newAddress = `
-        <div class="row justify-content-center address-${numberOfNewAddress}">
+        <div class="row justify-content-center ${addressClass}">
             <div class="col-8 text-left">
-                <label for="wallet-${numberOfNewAddress}" class="text-muted my-2">Wallet Address</label>
+                <label for="wallet-${numberOfNewAddress}" class="text-muted my-2 d-flex justify-content-between">
+                    Wallet Address
+                    <span class="delete-text" onclick="deleteWallet('${addressClass}')">Delete</span>
+                </label>
                 <input id="wallet-${numberOfNewAddress}" type="text" class="form-control custom" name="wallet-${numberOfNewAddress}" placeholder="">
             </div>
             <div class="col-4 col-lg-2">
@@ -124,6 +128,12 @@
         `;
 
         addressContainer.insertAdjacentHTML('beforeend', newAddress);
+    }
+
+    function deleteWallet(addressClassToDelete) {
+        let addressContainer = document.querySelector('.address-container');
+        let addressToDelete = document.querySelector(`.${addressClassToDelete}`);
+        addressContainer.removeChild(addressToDelete);
     }
 
     let thirdStepForm = document.getElementById('thirdStepForm');

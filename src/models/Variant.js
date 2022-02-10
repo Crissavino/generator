@@ -1,8 +1,11 @@
 const { Schema, model } = require("mongoose");
-const LayerSchema = require("./Layer");
 
 const VariantSchema = new Schema({
-    layer: LayerSchema,
+    layer: {
+        type: Schema.Types.ObjectId,
+        ref: "Layer",
+        required: true
+    },
     name: {
         type: String,
         require: true,
@@ -16,10 +19,6 @@ const VariantSchema = new Schema({
         require: true,
     },
     variantNumber: {
-        type: Number,
-        require: true,
-    },
-    variantPercentage: {
         type: Number,
         require: true,
     },

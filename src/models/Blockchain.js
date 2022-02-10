@@ -1,6 +1,4 @@
 const { Schema, model } = require("mongoose");
-const UserSchema = require("./User");
-const Blockchain = require("./Blockchain");
 
 const BlockchainSchema = new Schema({
     name: {

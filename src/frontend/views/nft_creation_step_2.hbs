@@ -6,7 +6,7 @@
             <p class="mx-auto wow fadeInLeft text-center w-75 mt-2 mb-4" data-wow-delay=".1s">
                 If you edit your layers you need to re-upload the folder for the changes to take place
             </p>
-            <form action="{{ saveSecondStepUrl }}" method="post">
+            <form action="{{ saveSecondStepUrl }}" id="secondStepForm" method="post">
                 <div class="d-flex flex-column justify-content-center align-items-center">
                     <div class="wow fadeInLeft folder" onclick="openChangeFolderBrowser()" data-wow-delay=".1s">
                         <div class="back"></div>
@@ -32,7 +32,7 @@
                 <div class="col-10 col-lg-6 mt-5 mx-auto text-center">
                     <label for="imagesToGenerate">How many images do you want to generate in total?</label>
                     <div class="mx-auto mt-3 col-4">
-                        <input id="imagesToGenerate" type="number" min="10" max="10000" class="form-control custom col-4" name="imagesToGenerate">
+                        <input id="imagesToGenerate" type="number" class="form-control custom col-4" name="imagesToGenerate">
                     </div>
                 </div>
 
@@ -145,6 +145,39 @@
 
         let blockchainSelectedValue = document.getElementById('blockchainSelectedValue');
         blockchainSelectedValue.setAttribute('value', blockchainSelected.id);
+    }
+
+    let secondStepForm = document.getElementById('secondStepForm');
+    secondStepForm.addEventListener('submit', function (e) {
+        // if imagesToGenerate are more than 10000, show warning
+        let imagesToGenerate = document.getElementById('imagesToGenerate').value;
+        if (isBiggerThan(10000, imagesToGenerate)) {
+            e.preventDefault();
+            Swal.fire({
+                width: 300,
+                position: 'bottom-end',
+                icon: 'warning',
+                title: 'Warning!',
+                text: 'You are trying to generate more than 10000 images.',
+            });
+        } else if (isLessThan(10, imagesToGenerate)) {
+            e.preventDefault();
+            Swal.fire({
+                width: 300,
+                position: 'bottom-end',
+                icon: 'warning',
+                title: 'Warning!',
+                text: 'You are trying to generate less than 10 images.',
+            });
+        }
+    });
+
+    function isBiggerThan(compare, number) {
+        return number > compare;
+    }
+
+    function isLessThan(compare, number) {
+        return number < compare;
     }
 
 </script>

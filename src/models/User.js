@@ -4,8 +4,6 @@ const UserSchema = new Schema({
     uuid: {
         type: String,
         required: true,
-        unique: true,
-        default: false,
     },
     name: {
         type: String,
@@ -18,7 +16,6 @@ const UserSchema = new Schema({
     email: {
         type: String,
         require: false,
-        unique: true,
     },
     password: {
         type: String,

@@ -17,7 +17,7 @@
                             </div>
                             <div class="col-10 col-lg-8 layer-to-order">
                                 <span class="layer-name">{{ name }}</span>
-                                <span class="layer-files">{{ filesInside }}</span>
+                                <span class="layer-files">{{ variantsNumber }}</span>
                             </div>
                         </div>
                     {{/each}}
@@ -55,7 +55,8 @@
                 layers.forEach(function (layer, index) {
                     layer.sortableIndex = sortableArray[index];
                 });
-                console.log(layers)
+                document.getElementById('layersOrdered').value = "";
+                document.getElementById('layersOrdered').value = JSON.stringify(layers);
                 return layers;
                 // let order = JSON.parse(layers);
                 // console.log(order)

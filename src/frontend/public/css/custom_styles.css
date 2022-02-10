@@ -136,6 +136,13 @@ textarea#csvTextarea::placeholder {
     padding: 9px 18px;
 }
 
+.delete-text {
+    text-decoration: underline;
+    text-underline-color: red;
+    color: red;
+    cursor: pointer;
+}
+
 .address-container {}
 
 .add-address-text {

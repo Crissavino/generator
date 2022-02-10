@@ -1,8 +1,11 @@
 const { Schema, model } = require("mongoose");
-const ProjectSchema = require("./Project");
 
-const CollectionSchema = new Schema({
-    project: ProjectSchema,
+const NftCollectionSchema = new Schema({
+    project: {
+        type: Schema.Types.ObjectId,
+        ref: "Project",
+        required: true
+    },
     name: {
         type: String,
         require: true,
@@ -25,7 +28,8 @@ const CollectionSchema = new Schema({
     },
     externalUrl: {
         type: String,
-        require: true,
+        require: false,
+        default: null
     },
     royaltiesForSecondarySales: {
         type: Number,
@@ -35,9 +39,9 @@ const CollectionSchema = new Schema({
     timestamps: true,
 });
 
-CollectionSchema.method("toJSON", function () {
+NftCollectionSchema.method("toJSON", function () {
     const { __v, ...obj } = this.toObject();
     return obj;
 });
 
-module.exports = model("Collection", CollectionSchema);
+module.exports = model("NftCollection", NftCollectionSchema);
