@@ -1,7 +1,7 @@
 <!-- ========================= hero-section start ========================= -->
 <section id="home" class="hero-section">
     <div class="container">
-        <div class="col-12 col-lg-8 p-3 mx-auto text-center big-white-modal">
+        <div class="col-12 col-lg-10 p-3 mx-auto text-center big-white-modal">
             <form id="fifthStepForm" class="mx-auto col-10" action="{{ saveFifthStepUrl }}" method="post">
 
                 {{#each layers}}
@@ -283,7 +283,6 @@
 
     setTimeout(() => {
         let allLayerTitles = document.querySelectorAll('.layer-title');
-        console.log(allLayerTitles)
         allLayerTitles[0].click()
-    }, 200);
+    }, 300);
 </script>

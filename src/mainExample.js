@@ -1,11 +1,14 @@
 const basePath = process.cwd();
-const { NETWORK } = require(`${basePath}/constants/network.js`);
+const NETWORK = {
+  eth: "eth",
+  sol: "sol",
+};
 const fs = require("fs");
-const sha1 = require(`${basePath}/node_modules/sha1`);
-const { createCanvas, loadImage } = require(`${basePath}/node_modules/canvas`);
+const sha1 = require('sha1');
+const { createCanvas, loadImage } = require('canvas');
 // replace this 3 variables with your own
-const buildDir = `${basePath}/build`;
-const layersDir = `${basePath}/layers`;
+const buildDir = "USER_BUILD_DIR_PATH";
+const layersDir = "USER_LAYERS_DIR_PATH";
 const {
   format,
   baseUri,
@@ -22,7 +25,7 @@ const {
   network,
   solanaMetadata,
   gif,
-} = require(`${basePath}/src/config.js`);
+} = require('USER_CONFIG_FILE_PATH');
 // replace this 3 variables with your own
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");
@@ -31,7 +34,7 @@ var metadataList = [];
 var attributesList = [];
 var dnaList = new Set();
 const DNA_DELIMITER = "-";
-const HashlipsGiffer = require(`${basePath}/modules/HashlipsGiffer.js`);
+const HashlipsGiffer = require(`HASHLIPSGIFFER_MODULE`);
 
 let hashlipsGiffer = null;
 

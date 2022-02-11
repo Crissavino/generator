@@ -2,6 +2,7 @@ const {response} = require("express");
 const fs = require('fs')
 const multer = require("multer");
 const mongoose = require("mongoose");
+const {spawn} = require('child_process')
 const User = require('../../models/User');
 const Project = require('../../models/Project');
 const Blockchain = require('../../models/Blockchain');
@@ -9,7 +10,8 @@ const NftCollection = require('../../models/NftCollection');
 const SplitRoyalty = require('../../models/SplitRoyalty');
 const Layer = require('../../models/Layer');
 const Variant = require('../../models/Variant');
-const {ObjectId} = require("mongodb");
+const basePath = process.cwd();
+const publicLayersPath = basePath + '/public/layers';
 
 const storageForLayersFolder = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -22,12 +24,12 @@ const storageForLayersFolder = multer.diskStorage({
         folderStructure.pop();
         folderStructure = folderStructure.join('/');
 
-        fs.mkdirSync(`public/layers/${userUuid}`, {recursive: true});
-        fs.chmodSync(`public/layers/${userUuid}`, 0o777);
-        fs.mkdirSync(`public/layers/${userUuid}/${folderStructure}`, {recursive: true});
-        fs.chmodSync(`public/layers/${userUuid}/${folderStructure}`, 0o777);
+        fs.mkdirSync(`${publicLayersPath}/${userUuid}`, {recursive: true});
+        fs.chmodSync(`${publicLayersPath}/${userUuid}`, 0o777);
+        fs.mkdirSync(`${publicLayersPath}/${userUuid}/${folderStructure}`, {recursive: true});
+        fs.chmodSync(`${publicLayersPath}/${userUuid}/${folderStructure}`, 0o777);
 
-        let path = `public/layers/${userUuid}/${folderStructure}`
+        let path = `${publicLayersPath}/${userUuid}/${folderStructure}`
         console.log(path);
 
         cb(null, path)
@@ -51,12 +53,12 @@ const storageForReplaceLayersFolder = multer.diskStorage({
         folderStructure.pop();
         folderStructure = folderStructure.join('/');
 
-        fs.mkdirSync(`public/layers/${userUuid}`, {recursive: true});
-        fs.chmodSync(`public/layers/${userUuid}`, 0o777);
-        fs.mkdirSync(`public/layers/${userUuid}/${folderStructure}`, {recursive: true});
-        fs.chmodSync(`public/layers/${userUuid}/${folderStructure}`, 0o777);
+        fs.mkdirSync(`${publicLayersPath}/${userUuid}`, {recursive: true});
+        fs.chmodSync(`${publicLayersPath}/${userUuid}`, 0o777);
+        fs.mkdirSync(`${publicLayersPath}/${userUuid}/${folderStructure}`, {recursive: true});
+        fs.chmodSync(`${publicLayersPath}/${userUuid}/${folderStructure}`, 0o777);
 
-        let path = `public/layers/${userUuid}/${folderStructure}`
+        let path = `${publicLayersPath}/${userUuid}/${folderStructure}`
 
         cb(null, path)
     },
@@ -167,14 +169,15 @@ const postLayersFolder = async (req, res = response) => {
 }
 
 function getUserUploadedFolder(userUuid, mainFolderName) {
+    console.log(mainFolderName)
     let layers = []
-    fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}`).forEach((folder, index) => {
+    fs.readdirSync(`${publicLayersPath}/${userUuid}/${mainFolderName}`).forEach((folder, index) => {
         layers.push({
             index,
             name: folder,
-            path: `public/layers/${userUuid}/${mainFolderName}/${folder}`,
-            filesInside: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).length,
-            files: fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${folder}`).map(file => {
+            path: `${publicLayersPath}/${userUuid}/${mainFolderName}/${folder}`,
+            filesInside: fs.readdirSync(`${publicLayersPath}/${userUuid}/${mainFolderName}/${folder}`).length,
+            files: fs.readdirSync(`${publicLayersPath}/${userUuid}/${mainFolderName}/${folder}`).map(file => {
                 return {
                     completeName: file,
                     name: file.split('.')[0],
@@ -187,13 +190,25 @@ function getUserUploadedFolder(userUuid, mainFolderName) {
     return layers
 }
 
+function getMailFolderName(userUuid) {
+    const mainFolderName = fs.readdirSync(`${publicLayersPath}/${userUuid}`);
+    // remove .DS_Store
+    if (mainFolderName.indexOf('.DS_Store') > 0) mainFolderName.splice(mainFolderName.indexOf('.DS_Store'), 1);
+    // sort by the oldest
+    mainFolderName.sort((a, b) => {
+        return fs.statSync(`${publicLayersPath}/${userUuid}/${a}`).mtime.getTime() - fs.statSync(`${publicLayersPath}/${userUuid}/${b}`).mtime.getTime()
+    })
+    console.log(mainFolderName)
+    return mainFolderName[0];
+}
+
 const seeSecondStep = async (req, res = response) => {
     let session = req.session;
     let userUuid = session.userUuid;
     if (!userUuid) {
         return res.redirect('/nft-creation/first-step')
     }
-    const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+    const mainFolderName = getMailFolderName(userUuid);
     let layers = getUserUploadedFolder(userUuid, mainFolderName);
     try {
         res.render("nft_creation_step_2", {
@@ -218,9 +233,9 @@ const replaceLayersFolder = async (req, res = response) => {
         let userUuid = session.userUuid;
 
         //remove older folder
-        fs.readdirSync(`public/layers/${userUuid}`).forEach(folder => {
+        fs.readdirSync(`${publicLayersPath}/${userUuid}`).forEach(folder => {
             console.log(folder)
-            fs.rmdirSync(`public/layers/${userUuid}/${folder}`, {recursive: true});
+            fs.rmdirSync(`${publicLayersPath}/${userUuid}/${folder}`, {recursive: true});
         })
 
         replacingLayersFolder(req, res, function (err) {
@@ -277,13 +292,13 @@ const saveSecondStep = async (req, res = response) => {
             // no blockchain found
             return res.redirect('/nft-creation/second-step')
         }
-        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+        const mainFolderName = getMailFolderName(userUuid);
         let project = new Project({
             blockchain: blockchain,
             user: user,
             name: projectName,
             numberToGenerate: imagesToGenerate,
-            layersFolderPath: `public/layers/${userUuid}/${mainFolderName}`
+            layersFolderPath: `${publicLayersPath}/${userUuid}/${mainFolderName}`
         });
         await Project.create(project, (err, project) => {
             console.log(project)
@@ -437,7 +452,7 @@ const saveThirdStep = async (req, res = response) => {
                 }
             }
 
-            const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+            const mainFolderName = getMailFolderName(userUuid);
             let layers = getUserUploadedFolder(userUuid, mainFolderName);
             for (const layersKey in layers) {
                 if (layers.hasOwnProperty(layersKey)) {
@@ -493,7 +508,7 @@ const seeFourthStep = async (req, res = response) => {
         return res.redirect('/nft-creation/second-step')
     }
     let nftCollectionId = session.nftCollectionId;
-    if (!session.nftCollectionId){
+    if (!session.nftCollectionId) {
         // TODO show flash alert
         // no nftCollectionId found
         return res.redirect('/nft-creation/third-step');
@@ -568,7 +583,7 @@ function attachVariantsFiles(layers) {
 
 const seeFifthStep = async (req, res = response) => {
     let session = req.session;
-    let userUuid = session.userUuid ?? '06k6c';
+    let userUuid = session.userUuid;
     if (!userUuid) {
         // TODO show flash alert
         // no userUuid found flash alert
@@ -628,6 +643,7 @@ const saveFifthStep = async (req, res) => {
         // no nftCollectionId found
         return res.redirect('/nft-creation/third-step');
     }
+    let project = await Project.findById(projectId).exec();
 
     try {
         variantsToAllocate = JSON.parse(variantsToAllocate);
@@ -654,28 +670,29 @@ const saveFifthStep = async (req, res) => {
             }
         });
 
-        const mainFolderName = fs.readdirSync(`public/layers/${userUuid}`);
+        const mainFolderName = getMailFolderName(userUuid);
 
         for (const variantsGroupedByLayersKey in variantsGroupedByLayers) {
             if (variantsGroupedByLayers.hasOwnProperty(variantsGroupedByLayersKey)) {
                 const layerFolder = variantsGroupedByLayersKey;
                 const variants = variantsGroupedByLayers[layerFolder];
-                fs.readdirSync(`public/layers/${userUuid}/${mainFolderName}/${layerFolder}`).forEach((file, index) => {
+                fs.readdirSync(`${publicLayersPath}/${userUuid}/${mainFolderName}/${layerFolder}`).forEach((file, index) => {
                     let fileName = file.split('.')[0];
                     let fileExtension = file.split('.')[1];
                     variants.map(async variant => {
                         if (variant.variantName === fileName) {
                             fs.renameSync(
-                                `public/layers/${userUuid}/${mainFolderName}/${layerFolder}/${file}`,
-                                `public/layers/${userUuid}/${mainFolderName}/${layerFolder}/${variant.traitWithRarity}.${fileExtension}`
+                                `${publicLayersPath}/${userUuid}/${mainFolderName}/${layerFolder}/${file}`,
+                                `${publicLayersPath}/${userUuid}/${mainFolderName}/${layerFolder}/${variant.traitWithRarity}.${fileExtension}`
                             );
 
                             let variantToSave = new Variant({
                                 layer: mongoose.Types.ObjectId(variant.layer),
                                 name: variant.traitName,
                                 fileName: `${variant.traitWithRarity}.${fileExtension}`,
-                                filePath: `public/layers/${userUuid}/${mainFolderName}/${layerFolder}/${variant.traitWithRarity}.${fileExtension}`,
-                                variantNumber: variant.variantNumber
+                                filePath: `${publicLayersPath}/${userUuid}/${mainFolderName}/${layerFolder}/${variant.traitWithRarity}.${fileExtension}`,
+                                variantNumber: variant.variantNumber,
+                                variantPercent: Math.round((variant.variantNumber / project.numberToGenerate) * 100)
                             });
                             await Variant.create(variantToSave, (err, variantSaved) => {
                                 console.log(variantSaved)
@@ -692,11 +709,203 @@ const saveFifthStep = async (req, res) => {
             }
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Todo bien",
+        await startCreation(userUuid, projectId, nftCollectionId);
+
+        return res.redirect('/nft-creation/confirmed');
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
+async function startCreation(userUuid, projectId, nftCollectionId) {
+    try {
+        let user = await findUserByUUid(userUuid);
+        let project = await Project.findById(projectId).exec();
+        let blockchain = await Blockchain.findById(project.blockchain).exec();
+        let layers = await findLayersByNftCollectionId(nftCollectionId);
+        // order layers by position
+        layers = layers.sort((a, b) => (a.position > b.position) ? 1 : -1);
+        let nftCollection = await NftCollection.findById(nftCollectionId).exec();
+        let creators = await findCreatorsByNftCollectionId(nftCollectionId);
+        let creatorsForMetadata = creators.map(creator => {
+            return {
+                address: creator['walletAddress'],
+                share: creator['percent'],
+            }
         });
 
+        let layerConfigurations = {
+            growEditionSizeTo: project.numberToGenerate,
+            layersOrdered: layers.map(layer => {
+                return {
+                    name: layer.name
+                }
+            })
+        };
+
+        // copy the runnerExample.js file inside the user folder in publicLayersPath
+        let runnerFile = fs.readFileSync(`${basePath}/src/runnerExample.js`, 'utf8');
+        runnerFile = runnerFile.replace("USER_MAIN_FILE_PATH", `${publicLayersPath}/${userUuid}/main.js`);
+        fs.writeFileSync(`${publicLayersPath}/${userUuid}/runner.js`, runnerFile);
+
+        // copy the config.js file inside the user folder in publicLayersPath
+        let configFile = fs.readFileSync(`${basePath}/src/configExample.js`, 'utf8');
+        configFile = configFile.replace("NETWORK_TO_USE", blockchain.shortName);
+        configFile = configFile.replace("NFT_COLLECTION_NAME", nftCollection.name);
+        configFile = configFile.replace("NFT_COLLECTION_DESCRIPTION", nftCollection.description);
+        configFile = configFile.replace("NFT_COLLECTION_SYMBOL", nftCollection.symbol);
+        configFile = configFile.replace("NFT_COLLECTION_ROYALTIES_FOR_SECOND_SALES", nftCollection.royaltiesForSecondarySales);
+        configFile = configFile.replace("NFT_COLLECTION_EXTERNAL_URL", nftCollection.externalUrl);
+        configFile = configFile.replace("NFT_COLLECTION_CREATORS", JSON.stringify(creatorsForMetadata));
+        configFile = configFile.replace("BLEND_MODE", `${basePath}/constants/blend_mode.js`);
+        configFile = configFile.replace("GROW_EDITION_SIZE_TO", layerConfigurations.growEditionSizeTo);
+        configFile = configFile.replace("LAYERS_ORDER", JSON.stringify(layerConfigurations.layersOrdered));
+        fs.writeFileSync(`${publicLayersPath}/${userUuid}/config.js`, configFile);
+
+        // copy the mainExample.js file inside the user folder in publicLayersPath
+        let mainFile = fs.readFileSync(`${basePath}/src/mainExample.js`, 'utf8');
+        mainFile = mainFile.replace("USER_BUILD_DIR_PATH", `${publicLayersPath}/${userUuid}/build`);
+        mainFile = mainFile.replace("USER_LAYERS_DIR_PATH", `${publicLayersPath}/${userUuid}/layers`);
+        mainFile = mainFile.replace("USER_CONFIG_FILE_PATH", `${publicLayersPath}/${userUuid}/config.js`);
+        mainFile = mainFile.replace("HASHLIPSGIFFER_MODULE", `${basePath}/modules/HashlipsGiffer.js`);
+        fs.writeFileSync(`${publicLayersPath}/${userUuid}/main.js`, mainFile);
+
+        // execute the runner.js file inside the user folder in publicLayersPath
+        let runner = spawn('node', [`${publicLayersPath}/${userUuid}/runner.js`]);
+
+        runner.stdout.on("data", data => {
+            console.log(`stdout: ${data}`);
+        });
+        runner.stderr.on("data", data => {
+            console.log(`stderr: ${data}`);
+        });
+
+        runner.on('error', (error) => {
+            console.log(`error: ${error.message}`);
+        });
+
+        runner.on("close", code => {
+            console.log(`child process exited with code ${code}`);
+        });
+
+        return {
+            success: true,
+            message: "All good",
+            data: {
+                basePath: basePath
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: "Server error",
+        };
+    }
+}
+
+async function findCreatorsByNftCollectionId(nftCollectionId) {
+    return await SplitRoyalty.find({nftCollection: nftCollectionId}).exec();
+}
+
+const creationStart = async (req, res = response) => {
+    const {userUuid, projectId, nftCollectionId} = req.body;
+    try {
+        let user = await findUserByUUid(userUuid);
+        let project = await Project.findById(projectId).exec();
+        let blockchain = await Blockchain.findById(project.blockchain).exec();
+        let layers = await findLayersByNftCollectionId(nftCollectionId);
+        // order layers by position
+        layers = layers.sort((a, b) => (a.position > b.position) ? 1 : -1);
+        let nftCollection = await NftCollection.findById(nftCollectionId).exec();
+        let creators = await findCreatorsByNftCollectionId(nftCollectionId);
+        let creatorsForMetadata = creators.map(creator => {
+            return {
+                address: creator['walletAddress'],
+                share: creator['percent'],
+            }
+        });
+
+        let layerConfigurations = {
+            growEditionSizeTo: project.numberToGenerate,
+            layersOrdered: layers.map(layer => {
+                return {
+                    name: layer.name
+                }
+            })
+        };
+
+        // copy the runnerExample.js file inside the user folder in publicLayersPath
+        let runnerFile = fs.readFileSync(`${basePath}/src/runnerExample.js`, 'utf8');
+        runnerFile = runnerFile.replace("USER_MAIN_FILE_PATH", `${publicLayersPath}/${userUuid}/main.js`);
+        fs.writeFileSync(`${publicLayersPath}/${userUuid}/runner.js`, runnerFile);
+
+        // copy the config.js file inside the user folder in publicLayersPath
+        let configFile = fs.readFileSync(`${basePath}/src/configExample.js`, 'utf8');
+        configFile = configFile.replace("NETWORK_TO_USE", blockchain.shortName);
+        configFile = configFile.replace("NFT_COLLECTION_NAME", nftCollection.name);
+        configFile = configFile.replace("NFT_COLLECTION_DESCRIPTION", nftCollection.description);
+        configFile = configFile.replace("NFT_COLLECTION_SYMBOL", nftCollection.symbol);
+        configFile = configFile.replace("NFT_COLLECTION_ROYALTIES_FOR_SECOND_SALES", nftCollection.royaltiesForSecondarySales);
+        configFile = configFile.replace("NFT_COLLECTION_EXTERNAL_URL", nftCollection.externalUrl);
+        configFile = configFile.replace("NFT_COLLECTION_CREATORS", JSON.stringify(creatorsForMetadata));
+        configFile = configFile.replace("BLEND_MODE", `${basePath}/constants/blend_mode.js`);
+        configFile = configFile.replace("GROW_EDITION_SIZE_TO", layerConfigurations.growEditionSizeTo);
+        configFile = configFile.replace("LAYERS_ORDER", JSON.stringify(layerConfigurations.layersOrdered));
+        fs.writeFileSync(`${publicLayersPath}/${userUuid}/config.js`, configFile);
+
+        // copy the mainExample.js file inside the user folder in publicLayersPath
+        let mainFile = fs.readFileSync(`${basePath}/src/mainExample.js`, 'utf8');
+        mainFile = mainFile.replace("USER_BUILD_DIR_PATH", `${publicLayersPath}/${userUuid}/build`);
+        mainFile = mainFile.replace("USER_LAYERS_DIR_PATH", `${publicLayersPath}/${userUuid}/layers`);
+        mainFile = mainFile.replace("USER_CONFIG_FILE_PATH", `${publicLayersPath}/${userUuid}/config.js`);
+        mainFile = mainFile.replace("HASHLIPSGIFFER_MODULE", `${basePath}/modules/HashlipsGiffer.js`);
+        fs.writeFileSync(`${publicLayersPath}/${userUuid}/main.js`, mainFile);
+
+        // execute the runner.js file inside the user folder in publicLayersPath
+        let runner = spawn('node', [`${publicLayersPath}/${userUuid}/runner.js`]);
+
+        runner.stdout.on("data", data => {
+            console.log(`stdout: ${data}`);
+        });
+        runner.stderr.on("data", data => {
+            console.log(`stderr: ${data}`);
+        });
+
+        runner.on('error', (error) => {
+            console.log(`error: ${error.message}`);
+        });
+
+        runner.on("close", code => {
+            console.log(`child process exited with code ${code}`);
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "All good",
+            data: {
+                basePath: basePath
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
+const seeCreationConfirmed = async (req, res = response) => {
+    try {
+        res.render("nft_creation_confirmed", {
+            pageTitle: "Creating layers",
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -717,5 +926,7 @@ module.exports = {
     seeFourthStep,
     saveFourthStep,
     seeFifthStep,
-    saveFifthStep
+    saveFifthStep,
+    creationStart,
+    seeCreationConfirmed
 };

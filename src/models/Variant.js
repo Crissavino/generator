@@ -22,6 +22,10 @@ const VariantSchema = new Schema({
         type: Number,
         require: true,
     },
+    variantPercent: {
+        type: Number,
+        require: true,
+    },
 }, {
     timestamps: true,
 });

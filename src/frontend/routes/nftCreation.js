@@ -11,7 +11,9 @@ const {
     seeFourthStep,
     saveFourthStep,
     seeFifthStep,
-    saveFifthStep
+    saveFifthStep,
+    seeCreationConfirmed,
+    creationStart
 } = require('../controllers/nftCreationController');
 
 
@@ -68,6 +70,16 @@ router.get(
 router.post(
     '/nft-creation/save-fifth-step',
     saveFifthStep
+);
+
+router.post(
+    '/nft-creation/start',
+    creationStart
+);
+
+router.get(
+    '/nft-creation/confirmed',
+    seeCreationConfirmed
 );
 
 module.exports = router;

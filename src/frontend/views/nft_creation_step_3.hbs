@@ -1,7 +1,7 @@
 <!-- ========================= hero-section start ========================= -->
 <section id="home" class="hero-section">
     <div class="container">
-        <div class="col-12 col-lg-8 p-3 mx-auto big-white-modal">
+        <div class="col-12 col-lg-10 p-3 mx-auto big-white-modal">
             <form id="thirdStepForm" action="{{ saveThirdStepUrl }}" method="post">
                 <div class="col-10 col-lg-6 mt-5 mx-auto text-center">
                     <label for="collectionName">What is the name of this collection?</label>
@@ -175,6 +175,23 @@
             errors.push({
                 success: false,
                 message: 'The sum of percentages for all the wallets must be 100%'
+            });
+        }
+
+        let secondRoyalties = document.getElementById('secondRoyalties');
+        if (parseInt(secondRoyalties.value.replace(/\s/g, '')) > 100) {
+            errors.push({
+                success: false,
+                message: 'Second royalties must be less than 100%'
+            });
+        } else if (
+            parseInt(secondRoyalties.value.replace(/\s/g, '')) === 0 ||
+            secondRoyalties.value === undefined ||
+            !secondRoyalties.value
+        ) {
+            errors.push({
+                success: false,
+                message: 'Please fill second royalties'
             });
         }
 

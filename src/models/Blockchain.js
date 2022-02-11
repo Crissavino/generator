@@ -5,6 +5,10 @@ const BlockchainSchema = new Schema({
         type: String,
         require: true,
     },
+    shortName: {
+        type: String,
+        require: true,
+    },
 }, {
     timestamps: true,
 });
