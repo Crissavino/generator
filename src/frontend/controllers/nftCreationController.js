@@ -304,7 +304,6 @@ const saveSecondStep = async (req, res = response) => {
             layersFolderPath: `${publicLayersPath}/${userUuid}/${mainFolderName}`
         });
         await Project.create(project, (err, project) => {
-            console.log(project)
             if (err) {
                 console.log(err);
                 return res.status(500).json({
@@ -429,6 +428,8 @@ const saveThirdStep = async (req, res = response) => {
             royaltiesForSecondarySales: secondRoyalties,
         });
         await NftCollection.create(nftCollection, async (err, nftCollection) => {
+            console.log('nftCollection')
+            console.log(nftCollection)
             if (err) {
                 console.log(err);
                 // TODO show flash alert
@@ -438,46 +439,48 @@ const saveThirdStep = async (req, res = response) => {
 
             session.nftCollectionId = nftCollection._id;
 
-            for (const splitRoyaltyKey in splitRoyalties) {
-                if (splitRoyalties.hasOwnProperty(splitRoyaltyKey)) {
-                    let royalty = new SplitRoyalty({
-                        nftCollection: nftCollection._id,
-                        walletAddress: splitRoyalties[splitRoyaltyKey].wallet_address,
-                        percent: splitRoyalties[splitRoyaltyKey].percent
-                    });
-                    await SplitRoyalty.create(royalty, (err, royalty) => {
-                        if (err) {
-                            console.log(err);
-                            // TODO show flash alert
-                            // saving error
-                            return res.redirect('/nft-creation/third-step')
-                        }
-                    });
-                }
+            for (let i = 0; i < splitRoyalties.length; i++) {
+                let royalty = new SplitRoyalty({
+                    nftCollection: nftCollection._id,
+                    walletAddress: splitRoyalties[i].wallet_address,
+                    percent: splitRoyalties[i].percent
+                });
+                await SplitRoyalty.create(royalty, (err, royalty) => {
+                    console.log('royalty')
+                    console.log(royalty)
+                    if (err) {
+                        console.log(err);
+                        // TODO show flash alert
+                        // saving error
+                        return res.redirect('/nft-creation/third-step')
+                    }
+                });
             }
 
             const mainFolderName = getMailFolderName(userUuid);
             let layers = getUserUploadedFolder(userUuid, mainFolderName);
-            for (const layersKey in layers) {
-                if (layers.hasOwnProperty(layersKey)) {
-                    let layer = new Layer({
-                        nftCollection: nftCollection._id,
-                        name: layers[layersKey].name,
-                        path: layers[layersKey].path,
-                        variantsNumber: layers[layersKey].filesInside,
-                        position: layers[layersKey].index,
-                    });
+            for (let i = 0; i < layers.length; i++) {
+                let layer = new Layer({
+                    nftCollection: nftCollection._id,
+                    name: layers[i].name,
+                    path: layers[i].path,
+                    variantsNumber: layers[i].filesInside,
+                    position: layers[i].index,
+                });
 
-                    await Layer.create(layer, (err, layer) => {
-                        if (err) {
-                            console.log(err);
-                            // TODO show flash alert
-                            // saving error
-                            return res.redirect('/nft-creation/third-step')
-                        }
-                    });
-                }
+                await Layer.create(layer, (err, layer) => {
+                    console.log('layer')
+                    console.log(layer)
+                    if (err) {
+                        console.log(err);
+                        // TODO show flash alert
+                        // saving error
+                        return res.redirect('/nft-creation/third-step')
+                    }
+                });
             }
+
+            console.log('salgo')
             res.redirect(`/nft-creation/fourth-step`)
         });
     } catch (error) {
@@ -519,17 +522,16 @@ const seeFourthStep = async (req, res = response) => {
     }
     // get all layers from nftCollectionId
     let layers = await findLayersByNftCollectionIdWithLean(nftCollectionId);
+    console.log({layers})
 
     try {
-        setTimeout( () => {
-            res.render("nft_creation_step_4", {
-                pageTitle: "Fourth Step",
-                currentActive: 4,
-                layers,
-                saveFourthStepUrl: '/nft-creation/save-fourth-step',
-                previousStepUrl: '/nft-creation/third-step'
-            });
-        }, 1000);
+        res.render("nft_creation_step_4", {
+            pageTitle: "Fourth Step",
+            currentActive: 4,
+            layers,
+            saveFourthStepUrl: '/nft-creation/save-fourth-step',
+            previousStepUrl: '/nft-creation/third-step'
+        });
 
     } catch (error) {
         console.error(error);
@@ -547,19 +549,20 @@ const saveFourthStep = async (req, res = response) => {
     session.layersOrdered = layersOrdered;
     layersOrdered = JSON.parse(layersOrdered);
     try {
-        for (const layersOrderedKey in layersOrdered) {
-            if (layersOrdered.hasOwnProperty(layersOrderedKey)) {
-                let layerOrdered = layersOrdered[layersOrderedKey];
-                await Layer.findByIdAndUpdate(layerOrdered._id, {position: layersOrderedKey}, null, (err, layer) => {
-                    if (err) {
-                        console.log(err);
-                        // TODO show flash alert
-                        // no saving error
-                        return res.redirect('/nft-creation/fourth-step');
-                    }
-                }).clone();
-            }
+        for (let i = 0; i < layersOrdered.length; i++) {
+            let layerOrdered = layersOrdered[i];
+            await Layer.findByIdAndUpdate(layerOrdered._id, {position: i}, null, (err, layer) => {
+                console.log('layerOrdered')
+                console.log(layer)
+                if (err) {
+                    console.log(err);
+                    // TODO show flash alert
+                    // no saving error
+                    return res.redirect('/nft-creation/fourth-step');
+                }
+            }).clone();
         }
+
         res.redirect(`/nft-creation/fifth-step`)
     } catch (error) {
         console.error(error);
