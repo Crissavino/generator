@@ -4,6 +4,13 @@
         <div class="col-12 col-lg-10 p-3 mx-auto text-center big-white-modal">
             <form id="fifthStepForm" class="mx-auto col-10" action="{{ saveFifthStepUrl }}" method="post">
 
+                <div class="buttons-to-allocate-container row justify-content-end">
+                    <button onclick="allocateAllEvenly({{json layers}}, {{totalNFTToGenerate}})" type="button"
+                            class="btn theme-btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-9 col-lg-3">Allocate
+                        All Traits Evenly
+                    </button>
+                </div>
+
                 {{#each layers}}
                     <div>
                         <div class="layer-title white-modal"
@@ -94,6 +101,12 @@
     }
 </style>
 <script>
+
+    function allocateAllEvenly(layers, totalNftToGenerate) {
+        layers.forEach(layer => {
+            allocateTraitEvenly(layer.name, layer.files, totalNftToGenerate)
+        })
+    }
 
     function allocateTraitFromSpreadsheet(traitToAllocate, files, totalNftToGenerate) {
         Swal.fire({

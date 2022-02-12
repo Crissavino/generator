@@ -44,9 +44,24 @@ textarea#csvTextarea::placeholder {
     text-align: left !important;
 }
 
+.navbar {
+    min-height: 50px !important;
+}
+
+.navbar-brand {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+.navbar-brand:hover {
+    color: #b2cbfc;
+}
+
 .hero-section {
-    /*padding-top: 70px !important;*/
+    padding-top: 150px !important;
     /*padding-bottom: 0 !important;*/
+    min-height: 100vh !important;
 }
 
 .uploader-background {
@@ -278,3 +293,54 @@ textarea#csvTextarea::placeholder {
 .allocate-trait-container {
     margin-bottom: 24px;
 }
+/* animation */
+.hero-section .hero-image {
+    text-align: center;
+    position: relative;
+    z-index: 0;
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px), (max-width: 767px) {
+    .hero-section .hero-image {
+        display: none;
+    }
+}
+
+.hero-section .hero-image .main-image {
+    z-index: 0;
+}
+
+.hero-section .hero-image .h2-move-1 {
+    position: absolute;
+    left: 42%;
+    -webkit-animation: bounce 3s linear infinite;
+    animation: bounce 3s linear infinite;
+}
+
+.hero-section .hero-image .h2-move-2 {
+    position: absolute;
+    left: 45%;
+    top: 68%;
+    -webkit-animation: bounce 3s linear infinite;
+    animation: bounce 3s linear infinite;
+}
+
+.hero-section .hero-image .h2-move-3 {
+    position: absolute;
+    left: 47%;
+    top: 26%;
+    z-index: -1;
+    -webkit-animation: bounce 4s linear infinite;
+    animation: bounce 4s linear infinite;
+}
+
+.hero-section .hero-image .dot-dot {
+    position: absolute;
+    left: -10%;
+    top: -14%;
+    height: 113%;
+    -webkit-animation: rotate2d 30s linear infinite;
+    animation: rotate2d 30s linear infinite;
+    width: 100%;
+}
+/* animation */

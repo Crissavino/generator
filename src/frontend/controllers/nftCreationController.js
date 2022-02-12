@@ -30,7 +30,6 @@ const storageForLayersFolder = multer.diskStorage({
         fs.chmodSync(`${publicLayersPath}/${userUuid}/${folderStructure}`, 0o777);
 
         let path = `${publicLayersPath}/${userUuid}/${folderStructure}`
-        console.log(path);
 
         cb(null, path)
     },
@@ -72,6 +71,7 @@ const storageForReplaceLayersFolder = multer.diskStorage({
 
 function fileFilter(req, file, cb) {
     if (
+        !file.originalname.includes('.DS_Store') &&
         file.mimetype !== 'image/jpeg' &&
         file.mimetype !== 'image/png' &&
         file.mimetype !== 'image/jpg' &&
@@ -79,8 +79,10 @@ function fileFilter(req, file, cb) {
     ) {
         cb(null, false);
         cb(new multer.MulterError('File type not allowed'));
-    } else {
+    } else if (!file.originalname.includes('.DS_Store')) {
         cb(null, true);
+    } else {
+        cb(null, false);
     }
 
 }
@@ -103,6 +105,7 @@ const seeFirstStep = async (req, res = response) => {
     try {
         res.render("nft_creation_step_1", {
             pageTitle: "First Step",
+            currentActive: 1,
             postLayerFolderUrl: '/nft-creation/post-layers-folder'
         });
     } catch (error) {
@@ -169,7 +172,6 @@ const postLayersFolder = async (req, res = response) => {
 }
 
 function getUserUploadedFolder(userUuid, mainFolderName) {
-    console.log(mainFolderName)
     let layers = []
     fs.readdirSync(`${publicLayersPath}/${userUuid}/${mainFolderName}`).forEach((folder, index) => {
         layers.push({
@@ -196,14 +198,14 @@ function getMailFolderName(userUuid) {
     if (mainFolderName.indexOf('.DS_Store') > 0) mainFolderName.splice(mainFolderName.indexOf('.DS_Store'), 1);
     // sort by the oldest
     mainFolderName.sort((a, b) => {
-        return fs.statSync(`${publicLayersPath}/${userUuid}/${a}`).mtime.getTime() - fs.statSync(`${publicLayersPath}/${userUuid}/${b}`).mtime.getTime()
+        return  fs.statSync(`${publicLayersPath}/${userUuid}/${b}`).mtime.getTime() - fs.statSync(`${publicLayersPath}/${userUuid}/${a}`).mtime.getTime()
     })
-    console.log(mainFolderName)
     return mainFolderName[0];
 }
 
 const seeSecondStep = async (req, res = response) => {
     let session = req.session;
+    // req.session.destroy();
     let userUuid = session.userUuid;
     if (!userUuid) {
         return res.redirect('/nft-creation/first-step')
@@ -215,6 +217,7 @@ const seeSecondStep = async (req, res = response) => {
             pageTitle: "Second Step",
             mainFolderName,
             layers,
+            currentActive: 2,
             saveSecondStepUrl: '/nft-creation/save-second-step'
         });
     } catch (error) {
@@ -348,6 +351,7 @@ const seeThirdStep = async (req, res = response) => {
     try {
         res.render("nft_creation_step_3", {
             pageTitle: "Fourth Step",
+            currentActive: 3,
             saveThirdStepUrl: '/nft-creation/save-third-step',
             previousStepUrl: '/nft-creation/second-step'
         });
@@ -515,13 +519,18 @@ const seeFourthStep = async (req, res = response) => {
     }
     // get all layers from nftCollectionId
     let layers = await findLayersByNftCollectionIdWithLean(nftCollectionId);
+
     try {
-        res.render("nft_creation_step_4", {
-            pageTitle: "Fourth Step",
-            layers,
-            saveFourthStepUrl: '/nft-creation/save-fourth-step',
-            previousStepUrl: '/nft-creation/third-step'
-        });
+        setTimeout( () => {
+            res.render("nft_creation_step_4", {
+                pageTitle: "Fourth Step",
+                currentActive: 4,
+                layers,
+                saveFourthStepUrl: '/nft-creation/save-fourth-step',
+                previousStepUrl: '/nft-creation/third-step'
+            });
+        }, 1000);
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -608,6 +617,7 @@ const seeFifthStep = async (req, res = response) => {
     try {
         res.render("nft_creation_step_5", {
             pageTitle: "Fifth Step",
+            currentActive: 5,
             layers,
             saveFifthStepUrl: '/nft-creation/save-fifth-step',
             previousStepUrl: '/nft-creation/fourth-step',
@@ -813,98 +823,12 @@ async function findCreatorsByNftCollectionId(nftCollectionId) {
     return await SplitRoyalty.find({nftCollection: nftCollectionId}).exec();
 }
 
-const creationStart = async (req, res = response) => {
-    const {userUuid, projectId, nftCollectionId} = req.body;
-    try {
-        let user = await findUserByUUid(userUuid);
-        let project = await Project.findById(projectId).exec();
-        let blockchain = await Blockchain.findById(project.blockchain).exec();
-        let layers = await findLayersByNftCollectionId(nftCollectionId);
-        // order layers by position
-        layers = layers.sort((a, b) => (a.position > b.position) ? 1 : -1);
-        let nftCollection = await NftCollection.findById(nftCollectionId).exec();
-        let creators = await findCreatorsByNftCollectionId(nftCollectionId);
-        let creatorsForMetadata = creators.map(creator => {
-            return {
-                address: creator['walletAddress'],
-                share: creator['percent'],
-            }
-        });
-
-        let layerConfigurations = {
-            growEditionSizeTo: project.numberToGenerate,
-            layersOrdered: layers.map(layer => {
-                return {
-                    name: layer.name
-                }
-            })
-        };
-
-        // copy the runnerExample.js file inside the user folder in publicLayersPath
-        let runnerFile = fs.readFileSync(`${basePath}/src/runnerExample.js`, 'utf8');
-        runnerFile = runnerFile.replace("USER_MAIN_FILE_PATH", `${publicLayersPath}/${userUuid}/main.js`);
-        fs.writeFileSync(`${publicLayersPath}/${userUuid}/runner.js`, runnerFile);
-
-        // copy the config.js file inside the user folder in publicLayersPath
-        let configFile = fs.readFileSync(`${basePath}/src/configExample.js`, 'utf8');
-        configFile = configFile.replace("NETWORK_TO_USE", blockchain.shortName);
-        configFile = configFile.replace("NFT_COLLECTION_NAME", nftCollection.name);
-        configFile = configFile.replace("NFT_COLLECTION_DESCRIPTION", nftCollection.description);
-        configFile = configFile.replace("NFT_COLLECTION_SYMBOL", nftCollection.symbol);
-        configFile = configFile.replace("NFT_COLLECTION_ROYALTIES_FOR_SECOND_SALES", nftCollection.royaltiesForSecondarySales);
-        configFile = configFile.replace("NFT_COLLECTION_EXTERNAL_URL", nftCollection.externalUrl);
-        configFile = configFile.replace("NFT_COLLECTION_CREATORS", JSON.stringify(creatorsForMetadata));
-        configFile = configFile.replace("BLEND_MODE", `${basePath}/constants/blend_mode.js`);
-        configFile = configFile.replace("GROW_EDITION_SIZE_TO", layerConfigurations.growEditionSizeTo);
-        configFile = configFile.replace("LAYERS_ORDER", JSON.stringify(layerConfigurations.layersOrdered));
-        fs.writeFileSync(`${publicLayersPath}/${userUuid}/config.js`, configFile);
-
-        // copy the mainExample.js file inside the user folder in publicLayersPath
-        let mainFile = fs.readFileSync(`${basePath}/src/mainExample.js`, 'utf8');
-        mainFile = mainFile.replace("USER_BUILD_DIR_PATH", `${publicLayersPath}/${userUuid}/build`);
-        mainFile = mainFile.replace("USER_LAYERS_DIR_PATH", `${publicLayersPath}/${userUuid}/layers`);
-        mainFile = mainFile.replace("USER_CONFIG_FILE_PATH", `${publicLayersPath}/${userUuid}/config.js`);
-        mainFile = mainFile.replace("HASHLIPSGIFFER_MODULE", `${basePath}/modules/HashlipsGiffer.js`);
-        fs.writeFileSync(`${publicLayersPath}/${userUuid}/main.js`, mainFile);
-
-        // execute the runner.js file inside the user folder in publicLayersPath
-        let runner = spawn('node', [`${publicLayersPath}/${userUuid}/runner.js`]);
-
-        runner.stdout.on("data", data => {
-            console.log(`stdout: ${data}`);
-        });
-        runner.stderr.on("data", data => {
-            console.log(`stderr: ${data}`);
-        });
-
-        runner.on('error', (error) => {
-            console.log(`error: ${error.message}`);
-        });
-
-        runner.on("close", code => {
-            console.log(`child process exited with code ${code}`);
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: "All good",
-            data: {
-                basePath: basePath
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-}
-
 const seeCreationConfirmed = async (req, res = response) => {
     try {
+        req.session.destroy();
         res.render("nft_creation_confirmed", {
             pageTitle: "Creating layers",
+            currentActive: 6,
         });
     } catch (error) {
         console.error(error);
@@ -927,6 +851,5 @@ module.exports = {
     saveFourthStep,
     seeFifthStep,
     saveFifthStep,
-    creationStart,
     seeCreationConfirmed
 };

@@ -1,0 +1,129 @@
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
+
+    .progress-container {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin-bottom: 75px;
+        max-width: 80%;
+    }
+
+    .progress-container::before {
+        content: '';
+        background: #FFFFFF;
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        height: 4px;
+        width: 95%;
+        z-index: -1;
+    }
+
+    .progress {
+        background: linear-gradient(to right, #34b15e 0%, #73e09a 50%, #34b15e 100%);
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        height: 4px;
+        width: 0%;
+        z-index: -1;
+        transition: 0.4s ease;
+    }
+
+    .step-circle-container {
+        position: relative;
+        top: 16px;
+        left: -7px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .step-text {
+        font-family: 'Muli', sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        color: #FFFFFF;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .circle {
+        background-color: #fff;
+        color: #999;
+        border-radius: 50%;
+        height: 50px;
+        width: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #FFFFFF;
+        transition: 0.4s ease;
+    }
+
+    .circle.active-step {
+        border-color: transparent;
+        background: linear-gradient(to right, #34b15e 0%, #73e09a 50%, #34b15e 100%);
+    }
+</style>
+
+<div class="col-10 progress-container mx-auto">
+    <div class="progress" id="progress"></div>
+    <a href="" onclick="preventDefaultLink(event)" class="step-circle-container">
+        <div class="circle">1</div>
+        <span class="step-text">First Step</span>
+    </a>
+    <a href="/nft-creation/second-step" class="step-circle-container">
+        <div class="circle">2</div>
+        <span class="step-text">Second Step</span>
+    </a>
+    <a href="/nft-creation/third-step" class="step-circle-container">
+        <div class="circle">3</div>
+        <span class="step-text">Third Step</span>
+    </a>
+    <a href="/nft-creation/fourth-step" class="step-circle-container">
+        <div class="circle">4</div>
+        <span class="step-text">Fourth Step</span>
+    </a>
+    <a href="/nft-creation/fifth-step" class="step-circle-container">
+        <div class="circle">5</div>
+        <span class="step-text">Fifth Step</span>
+    </a>
+    <a href="/nft-creation/sixth-step" class="step-circle-container">
+        <div class="circle">6</div>
+        <span class="step-text">Sixth Step</span>
+    </a>
+<!--    <div class="circle" style="position: relative;right: -2px;">6</div>-->
+</div>
+
+<script>
+    setTimeout(() => {
+        update()
+    }, 300)
+
+    function preventDefaultLink(event) {
+        event.preventDefault()
+    }
+
+    function update() {
+        const circles = document.querySelectorAll('.circle')
+        const progress = document.getElementById('progress')
+        let currentActive = {{ currentActive }};
+
+        circles.forEach((circle, idx) => {
+            if(idx < currentActive) {
+                circle.classList.add('active-step')
+            } else {
+                circle.classList.remove('active-step')
+            }
+        })
+
+        const actives = document.querySelectorAll('.active-step')
+
+        progress.style.width = (actives.length - 1) / (circles.length - 1) * 100 + '%'
+
+    }
+</script>
