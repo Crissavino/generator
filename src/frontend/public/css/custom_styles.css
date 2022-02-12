@@ -343,4 +343,33 @@ textarea#csvTextarea::placeholder {
     animation: rotate2d 30s linear infinite;
     width: 100%;
 }
+
+@-webkit-keyframes bounce {
+    0%,
+    100% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
+    50% {
+        -webkit-transform: translateY(-40px);
+        transform: translateY(-40px);
+    }
+}
+
+@keyframes bounce {
+    0%,
+    100% {
+        -webkit-transform: translateY(0);
+        transform: translateY(0);
+    }
+    50% {
+        -webkit-transform: translateY(-40px);
+        transform: translateY(-40px);
+    }
+}
+
+.bounce {
+    -webkit-animation: bounce 2s linear infinite;
+    animation: bounce 1s linear infinite;
+}
 /* animation */
