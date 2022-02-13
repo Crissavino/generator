@@ -5,6 +5,11 @@ let RedisStore = require("connect-redis")(session)
 const morgan = require('morgan');
 const exphbs = require('express-handlebars');
 const path = require('path');
+const basePath = process.cwd();
+const publicPathForLayers = basePath + '/public';
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
 require('dotenv').config()
 
 // DB config
@@ -13,6 +18,14 @@ dbConnection();
 
 // initializations
 const app = express();
+
+// initialize socket.io
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+    }
+});
 
 // settings
 app.set('port', process.env.PORT || 4000);
@@ -45,7 +58,6 @@ app.use(express.json());
 
 // global variables
 app.use((req, res, next) => {
-
     next();
 })
 
@@ -56,9 +68,14 @@ app.use(require('./routes/authentication'));
 
 // public files
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(publicPathForLayers));
 
 // starting the server
 app.listen(app.get('port'), () => {
     console.log('Server on port', app.get('port'));
 });
+
+module.exports = {
+    io,
+    httpServer
+}

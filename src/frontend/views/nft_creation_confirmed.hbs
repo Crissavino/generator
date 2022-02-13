@@ -10,10 +10,55 @@
                     src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
             <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_tuxhzmzv.json" background="transparent" speed="1"
                            style="width: 500px;position: relative;top: 50px;" loop autoplay></lottie-player>
+
+            <div class="row container nft-image-container mx-auto">
+                <!-- Preloader -->
+                <div class="custom-preloader">
+                    <div class="custom-preloader-inner">
+                        <div class="custom-preloader-icon">
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /End Preloader -->
+                {{#each nftImages}}
+                    <div class="col-5 col-lg-3 p-2">
+                        <img class="nft-image" src="{{this}}" alt="Card image cap">
+                    </div>
+                {{/each}}
+            </div>
         </div>
     </div>
 </section>
 
 <script>
     localStorage.removeItem('userUuid');
+
+    try {
+        const socketFront = io('{{ socketUrl }}');
+
+        socketFront.on('newNftImage', function (data) {
+            let nftImageContainer = document.querySelector('.nft-image-container');
+            if (nftImageContainer.querySelectorAll('.nft-image').length === 4) return;
+            let nftImage = document.createElement('img');
+            nftImage.classList.add('nft-image');
+            nftImage.src = data.newImage;
+            let div = document.createElement('div');
+            div.classList.add('col-5', 'col-lg-3', 'p-2');
+            div.appendChild(nftImage);
+            nftImageContainer.appendChild(div);
+            // destroy the preloader
+            let preloader = document.querySelector('.custom-preloader');
+            if (preloader) {
+                preloader.parentNode.removeChild(preloader);
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+    }
+
+
+
 </script>

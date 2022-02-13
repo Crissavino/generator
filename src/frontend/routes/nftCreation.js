@@ -12,7 +12,7 @@ const {
     saveFourthStep,
     seeFifthStep,
     saveFifthStep,
-    seeCreationConfirmed,
+    seeCreationConfirmed, updateNftImageInView,
 } = require('../controllers/nftCreationController');
 
 
@@ -74,6 +74,11 @@ router.post(
 router.get(
     '/nft-creation/confirmed',
     seeCreationConfirmed
+);
+
+router.post(
+    '/nft-creation/update-nft-confirmed-view',
+    updateNftImageInView
 );
 
 module.exports = router;

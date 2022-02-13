@@ -1,4 +1,4 @@
-const {response} = require("express");
+const {response, json} = require("express");
 const fs = require('fs')
 const multer = require("multer");
 const mongoose = require("mongoose");
@@ -439,26 +439,40 @@ const saveThirdStep = async (req, res = response) => {
 
             session.nftCollectionId = nftCollection._id;
 
+            let royaltiesToSave = [];
             for (let i = 0; i < splitRoyalties.length; i++) {
                 let royalty = new SplitRoyalty({
                     nftCollection: nftCollection._id,
                     walletAddress: splitRoyalties[i].wallet_address,
                     percent: splitRoyalties[i].percent
                 });
-                await SplitRoyalty.create(royalty, (err, royalty) => {
-                    console.log('royalty')
-                    console.log(royalty)
-                    if (err) {
-                        console.log(err);
-                        // TODO show flash alert
-                        // saving error
-                        return res.redirect('/nft-creation/third-step')
-                    }
-                });
+                royaltiesToSave.push(royalty);
+                // await SplitRoyalty.create(royalty, (err, royalty) => {
+                //     console.log('royalty')
+                //     console.log(royalty)
+                //     if (err) {
+                //         console.log(err);
+                //         // TODO show flash alert
+                //         // saving error
+                //         return res.redirect('/nft-creation/third-step')
+                //     }
+                // });
             }
+
+            await SplitRoyalty.insertMany(royaltiesToSave, (err, royalties) => {
+                console.log('royalties')
+                console.log(royalties)
+                if (err) {
+                    console.log(err);
+                    // TODO show flash alert
+                    // saving error
+                    return res.redirect('/nft-creation/third-step')
+                }
+            });
 
             const mainFolderName = getMailFolderName(userUuid);
             let layers = getUserUploadedFolder(userUuid, mainFolderName);
+            let layersToInsert = [];
             for (let i = 0; i < layers.length; i++) {
                 let layer = new Layer({
                     nftCollection: nftCollection._id,
@@ -467,21 +481,35 @@ const saveThirdStep = async (req, res = response) => {
                     variantsNumber: layers[i].filesInside,
                     position: layers[i].index,
                 });
+                console.log('entra layer ' + layers[i].name)
+                layersToInsert.push(layer);
 
-                await Layer.create(layer, (err, layer) => {
-                    console.log('layer')
-                    console.log(layer)
-                    if (err) {
-                        console.log(err);
-                        // TODO show flash alert
-                        // saving error
-                        return res.redirect('/nft-creation/third-step')
-                    }
-                });
+                // await Layer.create(layer, (err, layer) => {
+                //     console.log('layer')
+                //     console.log(layer)
+                //     if (err) {
+                //         console.log(err);
+                //         // TODO show flash alert
+                //         // saving error
+                //         return res.redirect('/nft-creation/third-step')
+                //     }
+                // });
             }
 
-            console.log('salgo')
-            res.redirect(`/nft-creation/fourth-step`)
+            console.log('salio del for')
+            await Layer.insertMany(layersToInsert, (err, layers) => {
+                console.log('layers')
+                console.log(layers)
+                if (err) {
+                    console.log(err);
+                    // TODO show flash alert
+                    // saving error
+                    return res.redirect('/nft-creation/third-step')
+                }
+
+                console.log('salgo')
+                return res.redirect(`/nft-creation/fourth-step`)
+            });
         });
     } catch (error) {
         console.error(error);
@@ -522,7 +550,6 @@ const seeFourthStep = async (req, res = response) => {
     }
     // get all layers from nftCollectionId
     let layers = await findLayersByNftCollectionIdWithLean(nftCollectionId);
-    console.log({layers})
 
     try {
         res.render("nft_creation_step_4", {
@@ -722,7 +749,8 @@ const saveFifthStep = async (req, res) => {
             }
         }
 
-        await startCreation(userUuid, projectId, nftCollectionId);
+        let socket = createSocketServer();
+        await startCreation(userUuid, projectId, nftCollectionId, socket);
 
         return res.redirect('/nft-creation/confirmed');
 
@@ -735,7 +763,7 @@ const saveFifthStep = async (req, res) => {
     }
 }
 
-async function startCreation(userUuid, projectId, nftCollectionId) {
+async function startCreation(userUuid, projectId, nftCollectionId, socket) {
     try {
         let user = await findUserByUUid(userUuid);
         let project = await Project.findById(projectId).exec();
@@ -786,14 +814,27 @@ async function startCreation(userUuid, projectId, nftCollectionId) {
         mainFile = mainFile.replace("USER_LAYERS_DIR_PATH", `${publicLayersPath}/${userUuid}/layers`);
         mainFile = mainFile.replace("USER_CONFIG_FILE_PATH", `${publicLayersPath}/${userUuid}/config.js`);
         mainFile = mainFile.replace("HASHLIPSGIFFER_MODULE", `${basePath}/modules/HashlipsGiffer.js`);
+        mainFile = mainFile.replace("USER_UUID", userUuid);
         fs.writeFileSync(`${publicLayersPath}/${userUuid}/main.js`, mainFile);
 
         // execute the runner.js file inside the user folder in publicLayersPath
         let runner = spawn('node', [`${publicLayersPath}/${userUuid}/runner.js`]);
 
         runner.stdout.on("data", data => {
-            console.log(`stdout: ${data}`);
+            let index = null;
+            let newImagePath = null;
+            if (data.includes('index')) index = parseInt(data.toString().split('index')[1]);
+            if (data.includes('newImagePath')) newImagePath = data.toString().split('newImagePath')[1];
+            if (index && index > 5) return;
+            // TODO check socket undefined
+            console.log('Socket ' + socket)
+            if (socket && newImagePath && index <= 4) {
+                socket.emit('newNftImage', {
+                    newImage: newImagePath
+                });
+            }
         });
+
         runner.stderr.on("data", data => {
             console.log(`stderr: ${data}`);
         });
@@ -826,12 +867,43 @@ async function findCreatorsByNftCollectionId(nftCollectionId) {
     return await SplitRoyalty.find({nftCollection: nftCollectionId}).exec();
 }
 
+function createSocketServer() {
+    const {io, httpServer} = require("../index");
+    // prevent listen if is already listen
+    if (io.sockets.listenerCount("connection") > 0 || io.listeners("connection").length > 0) {
+        return;
+    }
+    httpServer.listen(process.env.SOCKET_PORT || 4001);
+    return io.on("connection", (socket) => {
+        console.log("Socket connected");
+        return socket;
+    });
+
+}
+
 const seeCreationConfirmed = async (req, res = response) => {
     try {
         req.session.destroy();
         res.render("nft_creation_confirmed", {
             pageTitle: "Creating layers",
+            socketLinkTag: `<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>`,
+            socketUrl: `${process.env.SOCKET_URL}`,
             currentActive: 6,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
+const updateNftImageInView = async (req, res = response) => {
+    try {
+        let nftImages = req.body.nftImages;
+        res.json({
+            nftImages: nftImages
         });
     } catch (error) {
         console.error(error);
@@ -854,5 +926,6 @@ module.exports = {
     saveFourthStep,
     seeFifthStep,
     saveFifthStep,
-    seeCreationConfirmed
+    seeCreationConfirmed,
+    updateNftImageInView
 };

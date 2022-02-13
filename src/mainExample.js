@@ -398,6 +398,8 @@ const startCreating = async () => {
           saveImage(abstractedIndexes[0]);
           addMetadata(newDna, abstractedIndexes[0]);
           saveMetaDataSingleFile(abstractedIndexes[0]);
+          console.log(`index${abstractedIndexes[0]}index`);
+          console.log(`newImagePath${`/layers/USER_UUID/build/images/${abstractedIndexes[0]}.png`}newImagePath`);
           console.log(
             `Created edition: ${abstractedIndexes[0]}, with DNA: ${sha1(
               newDna
