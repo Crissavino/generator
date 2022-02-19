@@ -9,24 +9,21 @@
             <script
                     src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
             <lottie-player src="https://assets3.lottiefiles.com/packages/lf20_tuxhzmzv.json" background="transparent" speed="1"
-                           style="width: 500px;position: relative;top: 50px;" loop autoplay></lottie-player>
+                           style="max-width: 500px;position: relative;top: 50px;" loop autoplay></lottie-player>
 
             <div class="row container nft-image-container mx-auto">
                 <!-- Preloader -->
-                <div class="custom-preloader">
-                    <div class="custom-preloader-inner">
-                        <div class="custom-preloader-icon">
-                            <span></span>
-                            <span></span>
+                <div class="col-5 col-lg-3 p-2 custom-preloader-container">
+                    <div class="custom-preloader">
+                        <div class="custom-preloader-inner">
+                            <div class="custom-preloader-icon">
+                                <span></span>
+                                <span></span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <!-- /End Preloader -->
-                {{#each nftImages}}
-                    <div class="col-5 col-lg-3 p-2">
-                        <img class="nft-image" src="{{this}}" alt="Card image cap">
-                    </div>
-                {{/each}}
             </div>
         </div>
     </div>
@@ -40,7 +37,28 @@
 
         socketFront.on('newNftImage', function (data) {
             let nftImageContainer = document.querySelector('.nft-image-container');
-            if (nftImageContainer.querySelectorAll('.nft-image').length === 4) return;
+            console.log(nftImageContainer.querySelectorAll('.nft-image').length)
+            if (nftImageContainer.querySelectorAll('.nft-image').length === 3) {
+                // create custom preloader and append it last
+                let customPreloader = document.createElement('div');
+                customPreloader.classList.add('custom-preloader');
+                customPreloader.setAttribute('style', 'width: 100% !important; height: 100% !important;');
+                customPreloader.innerHTML = `
+                    <div class="">
+                        <div class="custom-preloader-icon" style="position: relative; right: 50px;">
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>`;
+                let div = document.createElement('div');
+                div.classList.add('col-5', 'col-lg-3', 'p-2', 'm-auto');
+                div.appendChild(customPreloader);
+                nftImageContainer.appendChild(div);
+                console.log(nftImageContainer)
+                // close sockets
+                socketFront.close();
+                return;
+            }
             let nftImage = document.createElement('img');
             nftImage.classList.add('nft-image');
             nftImage.src = data.newImage;
@@ -49,7 +67,7 @@
             div.appendChild(nftImage);
             nftImageContainer.appendChild(div);
             // destroy the preloader
-            let preloader = document.querySelector('.custom-preloader');
+            let preloader = document.querySelector('.custom-preloader-container');
             if (preloader) {
                 preloader.parentNode.removeChild(preloader);
             }

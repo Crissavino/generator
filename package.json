@@ -22,6 +22,11 @@
     "preview_gif": "node utils/preview_gif.js",
     "generate_metadata": "node utils/generate_metadata.js"
   },
+  "nodemonConfig": {
+    "ignore": [
+      "public/**/*"
+    ]
+  },
   "author": "Cristian Savino",
   "license": "MIT",
   "dependencies": {

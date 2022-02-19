@@ -26,6 +26,7 @@ const io = new Server(httpServer, {
         origin: "*",
     }
 });
+httpServer.listen(process.env.SOCKET_PORT || 4001);
 
 // settings
 app.set('port', process.env.PORT || 4000);

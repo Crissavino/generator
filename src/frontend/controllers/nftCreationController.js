@@ -106,7 +106,8 @@ const seeFirstStep = async (req, res = response) => {
         res.render("nft_creation_step_1", {
             pageTitle: "First Step",
             currentActive: 1,
-            postLayerFolderUrl: '/nft-creation/post-layers-folder'
+            postLayerFolderUrl: '/nft-creation/post-layers-folder',
+            layerSampleFolderPath: '/layers.zip'
         });
     } catch (error) {
         console.error(error);
@@ -749,8 +750,10 @@ const saveFifthStep = async (req, res) => {
             }
         }
 
-        let socket = createSocketServer();
-        await startCreation(userUuid, projectId, nftCollectionId, socket);
+        const {io} = require("../index");
+        io.on("connection", async (socket) => {
+            await startCreation(userUuid, projectId, nftCollectionId, socket);
+        });
 
         return res.redirect('/nft-creation/confirmed');
 
@@ -825,10 +828,9 @@ async function startCreation(userUuid, projectId, nftCollectionId, socket) {
             let newImagePath = null;
             if (data.includes('index')) index = parseInt(data.toString().split('index')[1]);
             if (data.includes('newImagePath')) newImagePath = data.toString().split('newImagePath')[1];
-            if (index && index > 5) return;
-            // TODO check socket undefined
+            if (index && index > 4) return;
             console.log('Socket ' + socket)
-            if (socket && newImagePath && index <= 4) {
+            if (socket && newImagePath && index <= 3) {
                 socket.emit('newNftImage', {
                     newImage: newImagePath
                 });
@@ -867,16 +869,16 @@ async function findCreatorsByNftCollectionId(nftCollectionId) {
     return await SplitRoyalty.find({nftCollection: nftCollectionId}).exec();
 }
 
-function createSocketServer() {
+async function createSocketServer() {
     const {io, httpServer} = require("../index");
     // prevent listen if is already listen
     if (io.sockets.listenerCount("connection") > 0 || io.listeners("connection").length > 0) {
         return;
     }
     httpServer.listen(process.env.SOCKET_PORT || 4001);
-    return io.on("connection", (socket) => {
+    return io.on("connection", async (socket) => {
         console.log("Socket connected");
-        return socket;
+        return await socket;
     });
 
 }
