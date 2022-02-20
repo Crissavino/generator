@@ -1,0 +1,32 @@
+<section id="home" class="hero-section">
+    <div class="container">
+        <div class="col-12 col-lg-10 p-3 mx-auto text-center big-white-modal d-flex flex-column justify-content-center align-items-center">
+            <h2>Welcome to your personal area</h2>
+            <h4>
+                Here you can manage your projects, your NFTs collections and your wishlist.
+            </h4>
+
+            <div class="my-projects row w-100 mt-5">
+                <h3 class="mb-5">My projects</h3>
+                {{#each user.projects}}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ name }}</h5>
+                                <p>Your collections on this project</p>
+                                <div class="collections-list">
+                                    {{#each nftCollections}}
+                                        <div class="collection-item">
+                                            <a href="/user/collection/{{ _id }}">{{ name }}</a>
+                                        </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+
+            </div>
+        </div>
+    </div>
+</section>

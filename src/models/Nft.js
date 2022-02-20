@@ -1,16 +1,40 @@
 const {Schema, model} = require("mongoose");
 
 const NftSchema = new Schema({
-    collection: {
+    nftCollection: {
         type: Schema.Types.ObjectId,
-        ref: "Collection",
+        ref: "NftCollection",
         required: true
     },
     name: {
         type: String,
         require: true,
     },
+    imagePath: {
+        type: String,
+        require: true,
+    },
+    imageRelativePath: {
+        type: String,
+        require: true,
+    },
     metadata: {
+        type: String,
+        require: true,
+    },
+    metadataPath: {
+        type: String,
+        require: true,
+    },
+    metadataRelativePath: {
+        type: String,
+        require: true,
+    },
+    ipfsImageHash: {
+        type: String,
+        require: true,
+    },
+    ipfsMetadataHash: {
         type: String,
         require: true,
     },

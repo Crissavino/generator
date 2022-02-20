@@ -65,7 +65,7 @@ app.use((req, res, next) => {
 // routes
 app.use(require('./routes'));
 app.use(require('./routes/nftCreation'));
-app.use(require('./routes/authentication'));
+app.use(require('./routes/user'));
 
 // public files
 app.use(express.static(path.join(__dirname, 'public')));

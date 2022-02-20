@@ -1,0 +1,117 @@
+<section id="home" class="hero-section">
+    <div class="container">
+        <div class="col-12 col-lg-10 p-3 mx-auto text-center big-white-modal d-flex flex-column justify-content-center align-items-center">
+            <h2>This is your collection: {{ nftCollection.name }}</h2>
+            <h5>{{ nftCollection.symbol }}</h5>
+            <p>
+                {{ nftCollection.description }}
+            </p>
+
+            <div class="row nft-image-container mx-auto mt-5">
+                <h3 class="mb-5">Your NFTs images</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Preview</th>
+                            <th scope="col" colspan="2">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each nfts}}
+                            <tr>
+                                <th scope="row">{{ name }}</th>
+                                <td>
+                                    <img src="{{ imageRelativePath }}" alt="{{ name }}" class="" width="50" onclick="return">
+                                </td>
+                                <td>
+                                    <!-- go to a page for nft? -->
+                                    {{#isNotEmpty ipfsImageHash}}
+                                        <a href="https://ipfs.io/ipfs/{{ ipfsImageHash }}" class="btn btn-primary" target="_blank">View</a>
+                                    {{/isNotEmpty}}
+                                    {{#isEmpty ipfsImageHash}}
+<!--                                        disable the link-->
+                                        <button class="btn btn-primary" disabled>View</button>
+                                    {{/isEmpty}}
+                                </td>
+                                <td>
+                                    {{#isNotEmpty ipfsImageHash}}
+                                        <a href="#" class="btn btn-danger">Already Uploaded</a>
+                                    {{/isNotEmpty}}
+                                    {{#isEmpty ipfsImageHash}}
+                                        <a href="#" class="btn btn-secondary" onclick="uploadToIpfs(`{{_id}}`)">
+                                            Upload to IPFS
+                                        </a>
+                                    {{/isEmpty}}
+                                </td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row nft-image-container mx-auto mt-5">
+                <h3 class="mb-5">Your NFTs images</h3>
+                {{#each nfts}}
+                    <div class="col-5 col-lg-3 p-2">
+                        <h5 class="card-title">{{ name }}</h5>
+                        <img class="nft-image" src="{{ imageRelativePath }}" alt="{{ name }}">
+                    </div>
+                {{/each}}
+
+            </div>
+
+            <div class="my-layers row w-100 mt-5">
+                <h3 class="mb-5">Your layers</h3>
+                {{#each nftCollection.layers}}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ name }}</h5>
+                                <h6>The position of this layer in yours generated NFTs is {{ position }}</h6>
+                                <p>Have a total of {{ variantsNumber }} variants</p>
+                                <p>
+                                    <a href="#" class="btn btn-primary" >Show variants</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {{/each}}
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function uploadToIpfs(nftId) {
+        console.log(nftId)
+        // post with fetch to this url /ipfs/upload-one-file
+        // and send the nftId as a parameter
+
+        fetch('/ipfs/upload-one-file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nftId: nftId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            if (data.success) {
+                alert('Uploaded to IPFS')
+            } else {
+                alert('Error uploading to IPFS')
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            alert('Error uploading to IPFS')
+        })
+    }
+</script>

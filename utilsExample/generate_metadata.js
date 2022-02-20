@@ -1,15 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 const { createCanvas, loadImage } = require("canvas");
-const basePath = process.cwd();
-const buildDir = `${basePath}/build/json`;
-const inputDir = `${basePath}/build/images`;
+const buildDir = `PUBLIC_USER_FOLDER/build/json`;
+const inputDir = `PUBLIC_USER_FOLDER/build/images`;
 const {
   format,
   namePrefix,
   description,
   baseUri,
-} = require(`${basePath}/src/config.js`);
+} = require(`PUBLIC_USER_FOLDER/config.js`);
 const console = require("console");
 const canvas = createCanvas(format.width, format.height);
 const ctx = canvas.getContext("2d");

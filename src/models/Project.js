@@ -23,6 +23,10 @@ const ProjectSchema = new Schema({
         type: String,
         require: true,
     },
+    nftCollections: [{
+        type: Schema.Types.ObjectId,
+        ref: "NftCollection",
+    }],
 }, {
     timestamps: true,
 });

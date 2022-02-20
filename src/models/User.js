@@ -21,6 +21,12 @@ const UserSchema = new Schema({
         type: String,
         require: false,
     },
+    projects: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Project",
+        },
+    ],
 }, {
     timestamps: true,
 });

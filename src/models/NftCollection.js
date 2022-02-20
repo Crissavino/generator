@@ -35,6 +35,36 @@ const NftCollectionSchema = new Schema({
         type: Number,
         require: true,
     },
+    metadata: {
+        type: String,
+        require: true,
+    },
+    metadataPath: {
+        type: String,
+        require: true,
+    },
+    metadataRelativePath: {
+        type: String,
+        require: true,
+    },
+    ipfsImagesFolderHash: {
+        type: String,
+        require: true,
+    },
+    ipfsMetadataFolderHash: {
+        type: String,
+        require: true,
+    },
+    layers: [{
+        type: Schema.Types.ObjectId,
+        ref: "Layer",
+    }],
+    splitRoyalties: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "SplitRoyalties",
+        }
+    ],
 }, {
     timestamps: true,
 });

@@ -22,6 +22,10 @@ const LayerSchema = new Schema({
         type: Number,
         require: true,
     },
+    variants: [{
+        type: Schema.Types.ObjectId,
+        ref: "Variant",
+    }],
 }, {
     timestamps: true,
 });
