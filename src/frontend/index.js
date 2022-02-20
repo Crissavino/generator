@@ -27,12 +27,6 @@ const io = new Server(httpServer, {
     }
 });
 httpServer.listen(process.env.SOCKET_PORT || 4001);
-io.on("connection", async (socket) => {
-    console.log(socket)
-});
-io.on('error', (err) => {
-    console.log(err);
-});
 
 // settings
 app.set('port', process.env.PORT || 4000);
