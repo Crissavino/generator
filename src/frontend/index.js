@@ -70,6 +70,9 @@ app.use(require('./routes/user'));
 // public files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(publicPathForLayers));
+app.use('/img',express.static(path.join(__dirname, 'public/img')));
+app.use('/js',express.static(path.join(__dirname, 'public/js')));
+app.use('/css',express.static(path.join(__dirname, 'public/css')));
 
 // starting the server
 app.listen(app.get('port'), () => {
