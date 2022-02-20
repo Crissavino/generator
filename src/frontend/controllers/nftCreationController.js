@@ -12,6 +12,7 @@ const Layer = require('../../models/Layer');
 const Variant = require('../../models/Variant');
 const Nft = require('../../models/Nft');
 const {uploadCollectionMetadataToIpfs, uploadEntireCollectionToIpfs} = require("./ipfsController");
+const {io} = require("../index");
 const basePath = process.cwd();
 const publicLayersPath = basePath + '/public/layers';
 
@@ -786,9 +787,16 @@ const saveFifthStep = async (req, res) => {
             }
         }
 
+        console.log('llega')
+
         const {io} = require("../index");
+        console.log({io})
         io.on("connection", async (socket) => {
+            console.log(socket)
             await startCreation(userUuid, projectId, nftCollectionId, socket);
+        });
+        io.on('error', (err) => {
+            console.log(err);
         });
 
         return res.redirect('/nft-creation/confirmed');
