@@ -4,11 +4,23 @@ const User = require('../../models/User');
 const NftCollection = require('../../models/NftCollection');
 const Nft = require('../../models/Nft');
 const {updateJsonFiles} = require("./ipfsController");
+const {io} = require("../index");
 const basePath = process.cwd();
 const publicLayersPath = basePath + '/public/layers';
 
 const seeUserArea = async (req, res = response) => {
     const userUuid = req.session.userUuid ?? '1tuscb';
+    const {io} = require("../index");
+    console.log({io})
+    io.on("connection", async (socket) => {
+        console.log(socket)
+        socket.emit('test', {
+            test: 'test message'
+        });
+    });
+    io.on('error', (err) => {
+        console.log(err);
+    });
     try {
         // get user by uuid with projects, projects with nftCollections, nftCollections with layers and layers with variants
         const user = await User.findOne({ uuid: userUuid }).populate({
@@ -24,8 +36,11 @@ const seeUserArea = async (req, res = response) => {
             }
         }).lean();
         console.log(user)
+        console.log(`${process.env.SOCKET_URL}`)
         res.render("user_area", {
             user,
+            socketLinkTag: `<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>`,
+            socketUrl: `${process.env.SOCKET_URL}`,
         });
     } catch (error) {
         console.error(error);

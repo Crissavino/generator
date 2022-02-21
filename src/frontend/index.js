@@ -24,7 +24,8 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
         origin: "*",
-    }
+    },
+    path: "/socket.io",
 });
 httpServer.listen(process.env.SOCKET_PORT || 4001);
 

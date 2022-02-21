@@ -30,3 +30,12 @@
         </div>
     </div>
 </section>
+
+<script>
+    // socket listen event test
+    const socketFront = io('{{ socketUrl }}');
+
+    socketFront.on('test', function (data) {
+        console.log(data)
+    });
+</script>
