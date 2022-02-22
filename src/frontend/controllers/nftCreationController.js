@@ -1024,7 +1024,7 @@ async function createSocketServer() {
 
 const seeCreationConfirmed = async (req, res = response) => {
     try {
-        // req.session.destroy();
+        req.session.destroy();
         res.render("nft_creation_confirmed", {
             pageTitle: "Creating layers",
             socketLinkTag: `<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>`,
