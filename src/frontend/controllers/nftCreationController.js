@@ -792,7 +792,6 @@ const saveFifthStep = async (req, res) => {
         const {io} = require("../index");
         console.log({io})
         io.on("connection", async (socket) => {
-            console.log(socket)
             await startCreation(userUuid, projectId, nftCollectionId, socket);
         });
         io.on('error', (err) => {
@@ -985,6 +984,8 @@ async function startCreation(userUuid, projectId, nftCollectionId, socket) {
         runner.on("close", code => {
             console.log(`child process exited with code ${code}`);
             createNfts(userUuid, nftCollectionId);
+            // close socket.io connection
+            if (socket) socket.disconnect();
         });
 
         return {
