@@ -81,8 +81,12 @@ const server = createServer(app);
 const httpServer = server.listen(process.env.PORT || 4000, () => {
     console.log('Server on port', app.get('port'));
 });
-
-const io = new Server(httpServer);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+    },
+    path: "/socket.io",
+});
 
 module.exports = {
     io,
