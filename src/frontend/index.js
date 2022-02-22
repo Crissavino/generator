@@ -86,7 +86,6 @@ const io = socketio(server, {
     },
     path: "/socket.io",
 });
-httpServer.listen(process.env.SOCKET_PORT || 4001);
 
 module.exports = {
     io,
