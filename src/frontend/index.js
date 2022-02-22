@@ -9,14 +9,15 @@ const basePath = process.cwd();
 const publicPathForLayers = basePath + '/public';
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const socketio = require('socket.io')
+
 require('dotenv').config()
 
-// DB config
-const { dbConnection } = require("../database/config");
-dbConnection();
+const PORT = process.env.PORT || 4000
+const app = express()
+const server = createServer(app);
 
 // initializations
-const app = express();
 
 // initialize socket.io
 // const httpServer = createServer(app);
@@ -68,25 +69,18 @@ app.use(require('./routes/nftCreation'));
 app.use(require('./routes/user'));
 
 // public files
-console.log(__dirname)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(publicPathForLayers));
 
-// starting the server
-// app.listen(app.get('port'), () => {
-//     console.log('Server on port', app.get('port'));
-// });
+// DB config
+const { dbConnection } = require("../database/config");
+dbConnection();
 
-const server = createServer(app);
 const httpServer = server.listen(process.env.PORT || 4000, () => {
     console.log('Server on port', app.get('port'));
 });
-const io = new Server(httpServer, {
-    cors: {
-        origin: "*",
-    },
-    path: "/socket.io",
-});
+
+const io = socketio(server);
 
 module.exports = {
     io,
