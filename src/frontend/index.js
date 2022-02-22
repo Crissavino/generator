@@ -81,13 +81,12 @@ const httpServer = server.listen(process.env.PORT || 4000, () => {
 });
 
 const io = socketio(server, {
-    path: '/socket.io',
-    serveClient: false,
-    // below are engine.IO options
-    pingInterval: 10000,
-    pingTimeout: 5000,
-    cookie: false
+    cors: {
+        origin: "*",
+    },
+    path: "/socket.io",
 });
+httpServer.listen(process.env.SOCKET_PORT || 4001);
 
 module.exports = {
     io,
