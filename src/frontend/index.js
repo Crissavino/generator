@@ -7,8 +7,9 @@ const exphbs = require('express-handlebars');
 const path = require('path');
 const basePath = process.cwd();
 const publicPathForLayers = basePath + '/public';
-const { createServer } = require("http");
+const { createServer } = require("https");
 const { Server } = require("socket.io");
+const fs = require('fs');
 
 require('dotenv').config()
 
@@ -20,7 +21,13 @@ dbConnection();
 const app = express();
 
 // initialize socket.io
-const httpServer = createServer(app);
+const path_root = '/etc/letsencrypt/live/realcryptoway.com/';
+const options = {
+    cert: fs.readFileSync(`${path_root}cert.pem`),
+    key: fs.readFileSync(`${path_root}privkey.pem`),
+};
+
+const httpServer = createServer(options, app);
 const io = new Server(httpServer, {
     cors: {
         origin: "*",
