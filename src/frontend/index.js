@@ -19,14 +19,14 @@ dbConnection();
 const app = express();
 
 // initialize socket.io
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    cors: {
-        origin: "*",
-    },
-    path: "/socket.io",
-});
-httpServer.listen(process.env.SOCKET_PORT || 4001);
+// const httpServer = createServer(app);
+// const io = new Server(httpServer, {
+//     cors: {
+//         origin: "*",
+//     },
+//     path: "/socket.io",
+// });
+// httpServer.listen(process.env.SOCKET_PORT || 4001);
 
 // settings
 app.set('port', process.env.PORT || 4000);
@@ -73,9 +73,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(publicPathForLayers));
 
 // starting the server
-app.listen(app.get('port'), () => {
+// app.listen(app.get('port'), () => {
+//     console.log('Server on port', app.get('port'));
+// });
+
+const server = createServer(app);
+const httpServer = server.listen(process.env.PORT || 4000, () => {
     console.log('Server on port', app.get('port'));
 });
+
+const io = new Server(httpServer);
 
 module.exports = {
     io,
