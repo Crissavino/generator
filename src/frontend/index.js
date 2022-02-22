@@ -80,7 +80,14 @@ const httpServer = server.listen(process.env.PORT || 4000, () => {
     console.log('Server on port', app.get('port'));
 });
 
-const io = socketio(server);
+const io = socketio(server, {
+    path: '/socket.io',
+    serveClient: false,
+    // below are engine.IO options
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    cookie: false
+});
 
 module.exports = {
     io,
