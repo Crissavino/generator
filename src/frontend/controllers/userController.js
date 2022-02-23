@@ -6,7 +6,6 @@ const Nft = require('../../models/Nft');
 const {updateJsonFiles} = require("./ipfsController");
 const basePath = process.cwd();
 const publicLayersPath = basePath + '/public/layers';
-const axios = require('axios');
 
 const seeUserArea = async (req, res = response) => {
     const userUuid = req.session.userUuid ?? '1twh6p';
