@@ -13,21 +13,7 @@ const socketio = require('socket.io')
 
 require('dotenv').config()
 
-const PORT = process.env.PORT || 4000
 const app = express()
-const server = createServer(app);
-
-// initializations
-
-// initialize socket.io
-// const httpServer = createServer(app);
-// const io = new Server(httpServer, {
-//     cors: {
-//         origin: "*",
-//     },
-//     path: "/socket.io",
-// });
-// httpServer.listen(process.env.SOCKET_PORT || 4001);
 
 // settings
 app.set('port', process.env.PORT || 4000);
@@ -76,16 +62,19 @@ app.use(express.static(publicPathForLayers));
 const { dbConnection } = require("../database/config");
 dbConnection();
 
-const httpServer = server.listen(process.env.PORT || 4000, () => {
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+    }
+});
+httpServer.listen(process.env.SOCKET_PORT || 4001);
+
+// starting the server
+app.listen(app.get('port'), () => {
     console.log('Server on port', app.get('port'));
 });
 
-const io = socketio(server, {
-    cors: {
-        origin: "*",
-    },
-    path: "/socket.io",
-});
 
 module.exports = {
     io,
