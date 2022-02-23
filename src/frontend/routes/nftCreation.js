@@ -77,7 +77,7 @@ router.get(
 );
 
 router.post(
-    '/nft-creation/update-nft-confirmed-view',
+    '/nft-creation/are-new-images',
     updateNftImageInView
 );
 

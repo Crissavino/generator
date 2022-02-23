@@ -12,7 +12,6 @@ const Layer = require('../../models/Layer');
 const Variant = require('../../models/Variant');
 const Nft = require('../../models/Nft');
 const {uploadCollectionMetadataToIpfs, uploadEntireCollectionToIpfs} = require("./ipfsController");
-const {io} = require("../index");
 const basePath = process.cwd();
 const publicLayersPath = basePath + '/public/layers';
 
@@ -787,16 +786,7 @@ const saveFifthStep = async (req, res) => {
             }
         }
 
-        console.log('llega')
-
-        const {io} = require("../index");
-        console.log({io})
-        io.on("connection", async (socket) => {
-            await startCreation(userUuid, projectId, nftCollectionId, socket);
-        });
-        io.on('error', (err) => {
-            console.log(err);
-        });
+        await startCreation(userUuid, projectId, nftCollectionId);
 
         return res.redirect('/nft-creation/confirmed');
 
@@ -927,7 +917,7 @@ function createPrincipalsScripts(userUuid, blockchain, nftCollection, creatorsFo
     fs.writeFileSync(`${publicLayersPath}/${userUuid}/main.js`, mainFile);
 }
 
-async function startCreation(userUuid, projectId, nftCollectionId, socket) {
+async function startCreation(userUuid, projectId, nftCollectionId) {
     try {
         let user = await findUserByUUid(userUuid);
         let project = await Project.findById(projectId).exec();
@@ -965,11 +955,8 @@ async function startCreation(userUuid, projectId, nftCollectionId, socket) {
             if (data.includes('index')) index = parseInt(data.toString().split('index')[1]);
             if (data.includes('newImagePath')) newImagePath = data.toString().split('newImagePath')[1];
             if (data.includes('newMetadataPath')) newMetadataPath = data.toString().split('newMetadataPath')[1];
-            console.log('Socket ' + socket)
-            if (socket && newImagePath && index <= 3) {
-                socket.emit('newNftImage', {
-                    newImage: newImagePath
-                });
+            if (newImagePath && index <= 3) {
+                // send the new url to the client side view without io
             }
         });
 
@@ -984,8 +971,6 @@ async function startCreation(userUuid, projectId, nftCollectionId, socket) {
         runner.on("close", code => {
             console.log(`child process exited with code ${code}`);
             createNfts(userUuid, nftCollectionId);
-            // close socket.io connection
-            if (socket) socket.disconnect();
         });
 
         return {
@@ -1024,13 +1009,17 @@ async function createSocketServer() {
 
 const seeCreationConfirmed = async (req, res = response) => {
     try {
-        req.session.destroy();
         res.render("nft_creation_confirmed", {
+            userUuid: req.session.userUuid,
             pageTitle: "Creating layers",
             socketLinkTag: `<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>`,
             socketUrl: `${process.env.SOCKET_URL}`,
             currentActive: 6,
         });
+        setTimeout(() => {
+            req.session.destroy();
+        }, 1000);
+
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -1042,9 +1031,41 @@ const seeCreationConfirmed = async (req, res = response) => {
 
 const updateNftImageInView = async (req, res = response) => {
     try {
-        let nftImages = req.body.nftImages;
+        // get all images from user build folder
+        const userUuid = req.body.userUuid;
+        const path = `${publicLayersPath}/${userUuid}/build/images`;
+        const pathForWeb = `/layers/${userUuid}/build/images`;
+        const images = 0;
+        // check if file exists
+        if (fs.existsSync(`${path}/1.png`) && !fs.existsSync(`${path}/2.png`) && !fs.existsSync(`${path}/3.png`)) {
+            return res.json({
+                    imagePaths: [
+                        `${pathForWeb}/1.png`,
+                    ],
+                },
+            )
+        }
+        if (fs.existsSync(`${path}/1.png`) && fs.existsSync(`${path}/2.png`) && !fs.existsSync(`${path}/3.png`)) {
+            return res.json({
+                    imagePaths: [
+                        `${pathForWeb}/1.png`,
+                        `${pathForWeb}/2.png`,
+                    ],
+                },
+            )
+        }
+        if (fs.existsSync(`${path}/1.png`) && fs.existsSync(`${path}/2.png`) && fs.existsSync(`${path}/3.png`)) {
+            return res.json({
+                    imagePaths: [
+                        `${pathForWeb}/1.png`,
+                        `${pathForWeb}/2.png`,
+                        `${pathForWeb}/3.png`,
+                    ],
+                },
+            )
+        }
         res.json({
-            nftImages: nftImages
+            imagePaths: []
         });
     } catch (error) {
         console.error(error);

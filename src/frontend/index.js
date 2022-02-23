@@ -7,9 +7,6 @@ const exphbs = require('express-handlebars');
 const path = require('path');
 const basePath = process.cwd();
 const publicPathForLayers = basePath + '/public';
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const socketio = require('socket.io')
 
 require('dotenv').config()
 
@@ -57,26 +54,13 @@ app.use(require('./routes/user'));
 // public files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(publicPathForLayers));
+app.use(express.static('public/layers/1twh6p/build/images'));
 
 // DB config
 const { dbConnection } = require("../database/config");
 dbConnection();
 
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    cors: {
-        origin: "*",
-    }
-});
-httpServer.listen(process.env.SOCKET_PORT || 4001);
-
 // starting the server
 app.listen(app.get('port'), () => {
     console.log('Server on port', app.get('port'));
 });
-
-
-module.exports = {
-    io,
-    httpServer
-}
