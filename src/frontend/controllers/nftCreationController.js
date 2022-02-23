@@ -1012,8 +1012,6 @@ const seeCreationConfirmed = async (req, res = response) => {
         res.render("nft_creation_confirmed", {
             userUuid: req.session.userUuid,
             pageTitle: "Creating layers",
-            socketLinkTag: `<script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>`,
-            socketUrl: `${process.env.SOCKET_URL}`,
             currentActive: 6,
         });
         setTimeout(() => {
