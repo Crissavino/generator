@@ -1,14 +1,11 @@
 const { response } = require("express");
-const fs = require("fs");
 const User = require('../../models/User');
 const NftCollection = require('../../models/NftCollection');
 const Nft = require('../../models/Nft');
-const {updateJsonFiles} = require("./ipfsController");
 const basePath = process.cwd();
-const publicLayersPath = basePath + '/public/layers';
 
 const seeUserArea = async (req, res = response) => {
-    const userUuid = req.session.userUuid ?? '1twh6p';
+    const userUuid = req.session.userUuid ?? 'tdgis7';
 
     try {
         // get user by uuid with projects, projects with nftCollections, nftCollections with layers and layers with variants

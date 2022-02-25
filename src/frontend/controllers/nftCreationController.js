@@ -917,6 +917,23 @@ function createPrincipalsScripts(userUuid, blockchain, nftCollection, creatorsFo
     fs.writeFileSync(`${publicLayersPath}/${userUuid}/main.js`, mainFile);
 }
 
+function createPreviewGifImage(userUuid) {
+    const previewGifFile = publicLayersPath + '/' + userUuid + '/utils/preview_gif.js';
+    let runner = spawn('node', [`${previewGifFile}`]);
+    runner.stdout.on("data", data => {
+        console.log(`stdout: ${data}`);
+    });
+    runner.stderr.on("data", data => {
+        console.log(`stderr: ${data}`);
+    });
+    runner.on('error', (error) => {
+        console.log(`error: ${error.message}`);
+    });
+    runner.on("close", code => {
+        console.log(`child process exited with code ${code}`);
+    });
+}
+
 async function startCreation(userUuid, projectId, nftCollectionId) {
     try {
         let user = await findUserByUUid(userUuid);
@@ -955,9 +972,6 @@ async function startCreation(userUuid, projectId, nftCollectionId) {
             if (data.includes('index')) index = parseInt(data.toString().split('index')[1]);
             if (data.includes('newImagePath')) newImagePath = data.toString().split('newImagePath')[1];
             if (data.includes('newMetadataPath')) newMetadataPath = data.toString().split('newMetadataPath')[1];
-            if (newImagePath && index <= 3) {
-                // send the new url to the client side view without io
-            }
         });
 
         runner.stderr.on("data", data => {
@@ -971,6 +985,7 @@ async function startCreation(userUuid, projectId, nftCollectionId) {
         runner.on("close", code => {
             console.log(`child process exited with code ${code}`);
             createNfts(userUuid, nftCollectionId);
+            createPreviewGifImage(userUuid);
         });
 
         return {

@@ -463,3 +463,41 @@ textarea#csvTextarea::placeholder {
         opacity: 0;
     }
 }
+
+.nft-card-2 {
+    box-shadow: 4px 4px 7px #e1e3ec;
+    border: 2px solid;
+    padding: 10px;
+}
+
+.collection-item-image {
+    box-shadow: 2px 2px 10px #e1e3ec;
+}
+
+.nft-card {
+    box-shadow: 2px 2px 10px #e1e3ec;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.nft-collection-name {
+    /*width: 200px;*/
+}
+
+.nft-collection-name h5 {
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-plus-container {
+    position: relative;
+}
+
+.folder-plus-container img {
+    position: absolute;
+    top: 60px;
+    right: 30px;
+    cursor: pointer;
+}
