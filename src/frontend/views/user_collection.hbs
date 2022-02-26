@@ -7,6 +7,18 @@
                 {{ nftCollection.description }}
             </p>
 
+            <div class="row justify-content-start">
+                <div class="col-6">
+                    <p> IPFS images folder hash: {{ nftCollection.ipfsImagesFolderHash }}</p>
+                    <a href="https://ipfs.io/ipfs/{{ nftCollection.ipfsImagesFolderHash }}" class="btn btn-primary" target="_blank">View</a>
+                </div>
+                <div class="col-6">
+                    <p> IPFS metadata folder hash: {{ nftCollection.ipfsMetadataFolderHash }}</p>
+                    <a href="https://ipfs.io/ipfs/{{ nftCollection.ipfsMetadataFolderHash }}" class="btn btn-primary" target="_blank">View</a>
+                </div>
+
+            </div>
+
             <div class="row nft-image-container mx-auto mt-5">
                 <h3 class="mb-5">Your NFTs images</h3>
                 <div class="table-responsive">
