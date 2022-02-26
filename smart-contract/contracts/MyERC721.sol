@@ -44,6 +44,13 @@ contract MyERC721 is ERC721, Ownable, ReentrancyGuard {
     setHiddenMetadataUri(_hiddenMetadataUri);
   }
 
+  // transfer ownership of the contract
+  function transferOwnership(address newOwner) public onlyOwner {
+    require(newOwner != address(0));
+    OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
+
   modifier mintCompliance(uint256 _mintAmount) {
     require(_mintAmount > 0 && _mintAmount <= maxMintAmountPerTx, "Invalid mint amount!");
     require(supply.current() + _mintAmount <= maxSupply, "Max supply exceeded!");
