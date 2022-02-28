@@ -45,7 +45,7 @@
                             <div class="buttons-to-allocate-container row justify-content-center">
                                 <button onclick="allocateTraitEvenly(`{{ name }}`, {{json
                                         files }}, {{ ../totalNFTToGenerate }})" type="button"
-                                        class="btn theme-btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-9 col-lg-3">Allocate
+                                        class="btn theme-btn btn-primary-custom mr-lg-4 mb-2 mb-lg-0 col-9 col-lg-4">Allocate
                                     Evenly
                                 </button>
                                 <button onclick="allocateTraitFromSpreadsheet(`{{ name }}`, {{json
@@ -57,8 +57,8 @@
                             <div class="col-12 col-lg-6 my-5 mx-auto variants-container"
                                  id="variantContainerOf-{{ name }}">
                                 {{#each files}}
-                                    <div class="col-10 variant">
-                                        <div class="col-4 text-right d-flex">
+                                    <div class="col-12 variant">
+                                        <div class="col-4 d-flex pr-2 tooltip-custom expand" data-title="{{ name }}">
                                             <span class="variant-name">{{ name }}</span>
                                         </div>
                                         <div class="col-4">
@@ -66,7 +66,7 @@
                                                    oninput="changeVariantData(this, {{@key}}, {{ ../../totalNFTToGenerate }})"
                                                    class="variant-allocate-input-of-{{@key}} form-control custom">
                                         </div>
-                                        <div class="col-2 text-left">
+                                        <div class="col-4">
                                             <span class="variant-allocate-percentage-of-{{ @key }}">0%</span>
                                         </div>
                                     </div>
