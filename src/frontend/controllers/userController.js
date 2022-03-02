@@ -13,7 +13,7 @@ const publicPath = basePath + '/public';
 const publicLayersPath = basePath + '/public/layers';
 
 const seeUserArea = async (req, res = response) => {
-    const userUuid = req.session.userUuid ?? 'o3gb';
+    const userUuid = req.session.userUuid ?? '309oet';
 
     try {
         // get user by uuid with projects, projects with nftCollections, nftCollections with layers and layers with variants
@@ -285,15 +285,15 @@ function changeContractName(contractName, userUuid, smartContractProjectFolderPa
     let runner = spawn('yarn', ['rename-contract', userUuid, contractName], { cwd: smartContractProjectFolderPath });
 
     runner.stdout.on("data", data => {
-        // console.log(data.toString());
+        console.log(data.toString());
     });
 
     runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
+        console.log(`stderr: ${data}`);
     });
 
     runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
+        console.log(`error: ${error.message}`);
     });
 
     runner.on("close", async (code) => {
