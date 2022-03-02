@@ -109,79 +109,6 @@ async function createContractName() {
 
 }
 
-async function copySmartContractProjectFolder(contractName, userUuid, project, configParameters, wallets) {
-
-    const userSmartContractFolderPath = basePath + '/public/smartContracts/' + userUuid;
-    if (!fs.existsSync(userSmartContractFolderPath)) {
-        fs.mkdirSync(userSmartContractFolderPath);
-        fs.chmodSync(userSmartContractFolderPath, 0o777);
-    }
-    const smartContractFolderPathToCopy = basePath + '/smart-contract';
-
-    // execute console cp command to copy the project folder and change name with mv
-    let runner = spawn('cp', ['-Rf', smartContractFolderPathToCopy, userSmartContractFolderPath]);
-
-    runner.stdout.on("data", data => {
-        // console.log(data.toString());
-    });
-
-    runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
-    });
-
-    runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
-    });
-
-    runner.on("close", async (code) => {
-        console.log('===========================');
-        console.log(`copySmartContractProjectFolder process exited with code ${code}`);
-        console.log(`At ${new Date().toUTCString()}`);
-        console.log('===========================');
-        await copyMintingDappProjectFolder(contractName, userUuid, project, configParameters, wallets)
-    });
-
-    return `${userSmartContractFolderPath}/smart-contract/config/CollectionConfig.ts`;
-
-}
-
-async function copyMintingDappProjectFolder(contractName, userUuid, project, configParameters, wallets) {
-
-    const userMintingDappFolderPath = basePath + '/public/mintingDapps/' + userUuid;
-    if (!fs.existsSync(userMintingDappFolderPath)) {
-        fs.mkdirSync(userMintingDappFolderPath);
-        fs.chmodSync(userMintingDappFolderPath, 0o777);
-    }
-    const mintingDappFolderPathToCopy = basePath + '/minting-dapp';
-
-    // execute console cp command to copy the project folder and change name with mv
-    let runner = spawn('cp', ['-Rf', mintingDappFolderPathToCopy, userMintingDappFolderPath]);
-
-    runner.stdout.on("data", data => {
-        // console.log(data.toString());
-    });
-
-    runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
-    });
-
-    runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
-    });
-
-    runner.on("close", (code) => {
-        console.log('===========================');
-        console.log(`copyMintingDappProjectFolder process exited with code ${code}`);
-        console.log(`At ${new Date().toUTCString()}`);
-        console.log('===========================');
-        editConfigFiles(contractName, userUuid, project, configParameters, wallets)
-        installDependencies(contractName, userUuid)
-    });
-
-    return `${userMintingDappFolderPath}/minting-dapp`;
-
-}
-
 function editConfigFiles(contractName, userUuid, project, configParameters, wallets, smartContractProjectFolderPath) {
     const smartContractUserConfigFolderPath = `${smartContractProjectFolderPath}/config/${userUuid}`;
 
@@ -217,47 +144,11 @@ function editConfigFiles(contractName, userUuid, project, configParameters, wall
 
     return `${smartContractUserConfigFolderPath}/CollectionConfig.ts`;
 }
-function editConfigFilesOld(contractName, userUuid, project, configParameters, wallets) {
-    const smartContractFolderPath = publicPath + '/smartContracts/' + userUuid + '/' + 'smart-contract';
-    const smartContractConfigFolderPath = smartContractFolderPath + '/config';
 
-    let collectionConfigFile = fs.readFileSync(`${smartContractConfigFolderPath}/CollectionConfig.ts`, 'utf8');
-    collectionConfigFile = collectionConfigFile.replace("TOKEN_NAME", project.nftCollections[0].name);
-    collectionConfigFile = collectionConfigFile.replace("TOKEN_SYMBOL", project.nftCollections[0].symbol);
-    collectionConfigFile = collectionConfigFile.replace("MAX_SUPPLY", project.numberToGenerate);
-    collectionConfigFile = collectionConfigFile.replace("WHITE_LIST_PRICE", configParameters.whiteListPrice);
-    collectionConfigFile = collectionConfigFile.replace("WHITE_LIST_MAX_MINT", configParameters.whiteListMaxMint);
-    collectionConfigFile = collectionConfigFile.replace("PRE_SALE_PRICE", configParameters.preSalePrice);
-    collectionConfigFile = collectionConfigFile.replace("PRE_SALE_MAX_MINT", configParameters.preSaleMaxMint);
-    collectionConfigFile = collectionConfigFile.replace("PUBLIC_PRICE", configParameters.preSalePrice);
-    collectionConfigFile = collectionConfigFile.replace("PUBLIC_MAX_MINT", configParameters.publicSaleMaxMint);
-    // create an open sea slug from token name
-    const slug = project.nftCollections[0].name.toLowerCase().replace(/ /g, '-');
-    collectionConfigFile = collectionConfigFile.replace("TOKEN_NAME_SLUG", slug);
-    fs.writeFileSync(`${smartContractConfigFolderPath}/CollectionConfig.ts`, collectionConfigFile);
-
-    //create a file with the array of wallets addresses
-    let walletsFile = fs.readFileSync(`${smartContractConfigFolderPath}/whitelist.json`, 'utf8');
-    walletsFile = walletsFile.replace("WALLETS_ARRAY", JSON.stringify(wallets));
-    fs.writeFileSync(`${smartContractConfigFolderPath}/whitelist.json`, walletsFile);
-
-    let envFile = fs.readFileSync(`${smartContractFolderPath}/.env`, 'utf8');
-    envFile = envFile.replace("METADATA_IPFS_CID", project.nftCollections[0].ipfsMetadataFolderHash);
-    fs.writeFileSync(`${smartContractFolderPath}/.env`, envFile);
-
-    console.log('===========================');
-    console.log('editConfigFiles finished');
-    console.log(`At ${new Date().toUTCString()}`);
-    console.log('===========================');
-
-    return `${smartContractConfigFolderPath}/CollectionConfig.ts`;
-}
-
-function installDependencies(contractName, userUuid) {
-    const userSmartContractFolderPath = basePath + '/public/smartContracts/' + userUuid;
-    const smartContractFolderPath = userSmartContractFolderPath + '/smart-contract';
+function changeContractName(contractName, userUuid, smartContractProjectFolderPath) {
     // execute spawn command to install hardhat and the yarn rename-contract command
-    let runner = spawn('npm', ['install', 'hardhat'], { cwd: smartContractFolderPath });
+    let runner = spawn('yarn', ['rename-contract', userUuid, contractName], { cwd: smartContractProjectFolderPath });
+
     runner.stdout.on("data", data => {
         // console.log(data.toString());
     });
@@ -268,32 +159,6 @@ function installDependencies(contractName, userUuid) {
 
     runner.on('error', (error) => {
         // console.log(`error: ${error.message}`);
-    });
-
-    runner.on("close", async (code) => {
-        console.log('===========================');
-        console.log(`installDependencies process exited with code ${code}`);
-        console.log(`At ${new Date().toUTCString()}`);
-        console.log('===========================');
-        changeContractName(contractName, userUuid);
-    });
-
-}
-
-function changeContractName(contractName, userUuid, smartContractProjectFolderPath) {
-    // execute spawn command to install hardhat and the yarn rename-contract command
-    let runner = spawn('yarn', ['rename-contract', userUuid, contractName], { cwd: smartContractProjectFolderPath });
-
-    runner.stdout.on("data", data => {
-        console.log(data.toString());
-    });
-
-    runner.stderr.on("data", data => {
-        console.log(`stderr: ${data}`);
-    });
-
-    runner.on('error', (error) => {
-        console.log(`error: ${error.message}`);
     });
 
     runner.on("close", async (code) => {
@@ -309,33 +174,6 @@ function changeContractName(contractName, userUuid, smartContractProjectFolderPa
             console.log(`At ${new Date().toUTCString()}`);
             console.log('===========================');
         }
-    });
-
-}
-function changeContractNameOld(contractName, userUuid) {
-    const userSmartContractFolderPath = basePath + '/public/smartContracts/' + userUuid;
-    const smartContractFolderPath = userSmartContractFolderPath + '/smart-contract';
-    // execute spawn command to install hardhat and the yarn rename-contract command
-    let runner = spawn('yarn', ['rename-contract', contractName, userUuid], { cwd: smartContractFolderPath });
-
-    runner.stdout.on("data", data => {
-        // console.log(data.toString());
-    });
-
-    runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
-    });
-
-    runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
-    });
-
-    runner.on("close", async (code) => {
-        console.log('===========================');
-        console.log(`changeContractName process exited with code ${code}`);
-        console.log(`At ${new Date().toUTCString()}`);
-        console.log('===========================');
-        deployTheContract(userUuid, contractName)
     });
 
 }
@@ -371,11 +209,11 @@ function deployTheContract(userUuid, contractName, network, smartContractProject
     });
 
     runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
+        console.log(`stderr: ${data}`);
     });
 
     runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
+        console.log(`error: ${error.message}`);
     });
 
     runner.on("close", async (code) => {
@@ -407,79 +245,20 @@ function deployTheContract(userUuid, contractName, network, smartContractProject
 
     return contractAddress;
 }
-function deployTheContractOld(userUuid, contractName) {
-    const userSmartContractFolderPath = basePath + '/public/smartContracts/' + userUuid;
-    const smartContractFolderPath = userSmartContractFolderPath + '/smart-contract';
-    // execute spawn command to install hardhat and the yarn rename-contract command
-    let runner = spawn('yarn', ['deploy', '--network', 'polygonTest'], { cwd: smartContractFolderPath });
-    let contractAddress = '';
-    runner.stdout.on("data", data => {
-        if (data.includes('CONTRACT_ADDRESS')) {
-            contractAddress = data.toString().split('CONTRACT_ADDRESS')[1]
-            console.log('===========================');
-            console.log(`Contract address changed to => ${contractAddress}`);
-            console.log(`At ${new Date().toUTCString()}`);
-            console.log('===========================');
-            // update the smart contract address in the database
-            updateSmartContract({name: contractName}, {address: contractAddress}).then(r => console.log('smart contract address updated'));
-            let collectionConfigFile = fs.readFileSync(`${smartContractFolderPath}/config/CollectionConfig.ts`, 'utf8');
-            collectionConfigFile = collectionConfigFile.replace("CONTRACT_ADDRESS", contractAddress);
-            fs.writeFileSync(`${smartContractFolderPath}/config/CollectionConfig.ts`, collectionConfigFile);
-        }
-
-    });
-
-    runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
-    });
-
-    runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
-    });
-
-    runner.on("close", async (code) => {
-        console.log('===========================');
-        console.log(`deployTheContract process exited with code ${code}`);
-        console.log(`At ${new Date().toUTCString()}`);
-        console.log('===========================');
-        if (code === 0) {
-            console.log('===========================');
-            console.log(`Deployment of smart contract ${contractName} successful`);
-            console.log(`At ${new Date().toUTCString()}`);
-            console.log('===========================');
-            setTimeout(() => {
-                console.log('===========================');
-                console.log(`verifyTheContact process started`);
-                console.log(`At ${new Date().toUTCString()}`);
-                console.log('===========================');
-                updateSmartContract({name: contractName}, {deployed: true}).then(r => console.log('smart contract deployed'));
-
-                verifyTheContact(userUuid, contractAddress, contractName)
-            } ,10000)
-        } else {
-            console.log('===========================');
-            console.log(`Deployment of smart contract ${contractName} failed`);
-            console.log(`At ${new Date().toUTCString()}`);
-            console.log('===========================');
-        }
-    });
-
-    return contractAddress;
-}
 
 function verifyTheContact(userUuid, contractAddress, contractName, smartContractProjectFolderPath) {
     // execute spawn command to install hardhat and the yarn rename-contract command
     let runner = spawn('yarn', ['verify', contractAddress,'--network', 'polygonTest', '--contract', `contracts/${userUuid}/${contractName}.sol:${contractName}`], { cwd: smartContractProjectFolderPath });
     runner.stdout.on("data", data => {
-        // console.log(data.toString());
+        console.log(data.toString());
     });
 
     runner.stderr.on("data", data => {
-        // console.log(`stderr: ${data}`);
+        console.log(`stderr: ${data}`);
     });
 
     runner.on('error', (error) => {
-        // console.log(`error: ${error.message}`);
+        console.log(`error: ${error.message}`);
     });
 
     runner.on("close", async (code) => {
