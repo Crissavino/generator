@@ -195,7 +195,7 @@ function getUserUploadedFolder(userUuid, mainFolderName) {
     return layers
 }
 
-function getMailFolderName(userUuid) {
+function getMainFolderName(userUuid) {
     const mainFolderName = fs.readdirSync(`${publicLayersPath}/${userUuid}`);
     // remove .DS_Store
     if (mainFolderName.indexOf('.DS_Store') > 0) mainFolderName.splice(mainFolderName.indexOf('.DS_Store'), 1);
@@ -213,7 +213,7 @@ const seeSecondStep = async (req, res = response) => {
     if (!userUuid) {
         return res.redirect('/nft-creation/first-step')
     }
-    const mainFolderName = getMailFolderName(userUuid);
+    const mainFolderName = getMainFolderName(userUuid);
     let layers = getUserUploadedFolder(userUuid, mainFolderName);
     // get the number of variants inside each layer
     let totalNftsAbleToGenerate = 0; // we get this number multipling the number of variants inside each layer
@@ -290,6 +290,12 @@ const saveSecondStep = async (req, res = response) => {
     try {
         const {imagesToGenerate, projectName, blockchainSelectedValue} = req.body;
         let session = req.session;
+        if (imagesToGenerate > 20) {
+            return res.status(500).json({
+                success: false,
+                message: "You can't generate more than 20 images, for now 🥲...",
+            });
+        }
         session.totalNFTToGenerate = imagesToGenerate;
         let userUuid = session.userUuid;
         if (!userUuid) {
@@ -309,7 +315,7 @@ const saveSecondStep = async (req, res = response) => {
             // no blockchain found
             return res.redirect('/nft-creation/second-step')
         }
-        const mainFolderName = getMailFolderName(userUuid);
+        const mainFolderName = getMainFolderName(userUuid);
         let project = new Project({
             blockchain: blockchain,
             user: user,
@@ -495,7 +501,7 @@ const saveThirdStep = async (req, res = response) => {
 
             });
 
-            const mainFolderName = getMailFolderName(userUuid);
+            const mainFolderName = getMainFolderName(userUuid);
             let layers = getUserUploadedFolder(userUuid, mainFolderName);
             let layersToInsert = [];
             for (let i = 0; i < layers.length; i++) {
@@ -727,7 +733,7 @@ const saveFifthStep = async (req, res) => {
             }
         });
 
-        const mainFolderName = getMailFolderName(userUuid);
+        const mainFolderName = getMainFolderName(userUuid);
 
         for (const variantsGroupedByLayersKey in variantsGroupedByLayers) {
             if (variantsGroupedByLayers.hasOwnProperty(variantsGroupedByLayersKey)) {
@@ -906,7 +912,7 @@ function createPrincipalsScripts(userUuid, blockchain, nftCollection, creatorsFo
     configFile = configFile.replace("LAYERS_ORDER", JSON.stringify(layerConfigurations.layersOrdered));
     fs.writeFileSync(`${publicLayersPath}/${userUuid}/config.js`, configFile);
 
-    let mainFolderName = getMailFolderName(userUuid);
+    let mainFolderName = getMainFolderName(userUuid);
     // copy the mainExample.js file inside the user folder in publicLayersPath
     let mainFile = fs.readFileSync(`${basePath}/src/mainExample.js`, 'utf8');
     mainFile = mainFile.replace("USER_BUILD_DIR_PATH", `${publicLayersPath}/${userUuid}/build`);
@@ -1006,20 +1012,6 @@ async function startCreation(userUuid, projectId, nftCollectionId) {
 
 async function findCreatorsByNftCollectionId(nftCollectionId) {
     return await SplitRoyalty.find({nftCollection: nftCollectionId}).exec();
-}
-
-async function createSocketServer() {
-    const {io, httpServer} = require("../index");
-    // prevent listen if is already listen
-    if (io.sockets.listenerCount("connection") > 0 || io.listeners("connection").length > 0) {
-        return;
-    }
-    httpServer.listen(process.env.SOCKET_PORT || 4001);
-    return io.on("connection", async (socket) => {
-        console.log("Socket connected");
-        return await socket;
-    });
-
 }
 
 const seeCreationConfirmed = async (req, res = response) => {

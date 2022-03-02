@@ -1,0 +1,196 @@
+<!-- ========================= hero-section start ========================= -->
+<section id="home" class="hero-section wow fadeInDown" data-wow-delay=".1s">
+    <div class="container">
+        <div class="col-12 col-lg-10 p-3 mx-auto big-white-modal">
+
+            <div class="btn-container mt-4 ml-auto">
+                <a href="/user/area" type="button" id="nextButton" class="btn text-white theme-btn back-button mr-4">Back</a>
+            </div>
+
+            <h3 class="text-center mt-3">Smart Contract</h3>
+            <p class="col-8 mx-auto text-center">
+                We will deploy the contract in the Polygon network.
+                The price need to be expressed in <strong>MATIC</strong> the Polygon token.
+            </p>
+
+            <form id="thirdStepForm" action="{{ saveSmartContractUrl }}" method="post">
+                <div class="row mb-4">
+                    <div class="col-lg-6 mt-3 mx-auto">
+                        <h6 class="my-3 text-center">White List Sale</h6>
+                        <div class="col-12">
+                            <label class="col-12 col-lg-12" for="whiteListPrice">Which will be the white list price?</label>
+                            <span class="text-muted">
+                                This is the price that will be charged for the white list.
+                            </span>
+                            <div class="mx-auto mt-3 col-12">
+                                <input id="whiteListPrice" type="number" step=".0001" class="form-control custom" name="whiteListPrice">
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="col-12 col-lg-12" for="whiteListMaxMintAmount">
+                                Which will be the max amount of NFTs that can be minted for the white list?
+                            </label>
+                            <div class="mx-auto mt-3 col-12">
+                                <input id="whiteListMaxMintAmount" type="number" class="form-control custom" name="whiteListMaxMintAmount">
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="col-12 col-lg-12">White List Addresses</label>
+                            <span class="text-muted">
+                                This is the list of addresses that will be whitelisted.
+                            </span>
+                            <div class="address-container">
+                                <div class="row justify-content-center address-1">
+                                    <div class="col-12 text-left">
+                                        <label for="wallet-1" class="text-muted my-2">Wallet Address</label>
+                                        <input id="wallet-1" type="text" class="form-control custom" name="wallets[]" placeholder="">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-12">
+                                    <p class="add-address-text" onclick="addAnotherWalletAddress()">+ Add another wallet address</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mt-3 mx-auto">
+                        <h6 class="my-3 text-center">Pre-sale</h6>
+                        <div class="col-12">
+                            <label class="col-12 col-lg-12" for="preSalePrice">
+                                Which will be the pre-sale price?
+                            </label>
+                            <span class="text-muted">
+                                This is the price that will be charged for the pre-sale.
+                            </span>
+                            <div class="mx-auto mt-3 col-12">
+                                <input id="preSalePrice" type="number" step=".0001" class="form-control custom" name="preSalePrice">
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label class="col-12 col-lg-12" for="preSaleMaxMintAmount">
+                                Which will be the max amount of NFTs that can be minted for the pre-sale?
+                            </label>
+                            <div class="mx-auto mt-3 col-12">
+                                <input id="preSaleMaxMintAmount" type="number" class="form-control custom" name="preSaleMaxMintAmount">
+                            </div>
+                        </div>
+                        <h6 class="my-3 text-center">Public Sale</h6>
+                        <div class="col-12 mt-3">
+                            <div>
+                                <label for="publicSalePrice">
+                                    Which will be the public sale price?
+                                </label>
+                                <span class="text-muted">
+                                    This is the price that will be charged for the public sale.
+                                </span>
+                                <div class="mt-3 col-12">
+                                    <input id="publicSalePrice" type="number" step=".0001" class="form-control custom"
+                                           name="publicSalePrice">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label class="col-12 col-lg-12" for="publicSaleMaxMintAmount">
+                                    Which will be the max amount of NFTs that can be minted for the public sale?
+                                </label>
+                                <div class="mt-3 col-12">
+                                    <input id="publicSaleMaxMintAmount" type="number" class="form-control custom" name="publicSaleMaxMintAmount">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <input class="d-none" type="text" name="userUuid" value="{{ userUuid }}">
+                <input class="d-none" type="text" name="projectId" value="{{ projectId }}">
+
+                <div class="btn-container mt-4 mx-auto text-center">
+                    <button type="submit" id="nextButton" class="btn text-white theme-btn next-button">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</section>
+<!-- ========================= hero-section end ========================= -->
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    // setTimeout(function() {
+    //     if (history.pushState) {
+    //         let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    //         window.history.pushState({path:newUrl},'',newUrl);
+    //     }
+    // }, 500);
+
+    function changeEachImageName(element) {
+        let name = element.value;
+        if (!name) name = 'NAME';
+        let eachImageNameText = document.getElementById('eachImageNameText');
+        eachImageNameText.innerText = `${name} #ID`;
+    }
+
+    function addAnotherWalletAddress() {
+        let addressContainer = document.querySelector('.address-container');
+        let numberOfNewAddress = addressContainer.children.length + 1;
+        let addressClass = `address-${numberOfNewAddress}`;
+        let newAddress = `
+        <div class="row justify-content-center ${addressClass}">
+            <div class="col-12 col-8 text-left">
+                <label for="wallet-${numberOfNewAddress}" class="text-muted my-2 d-flex justify-content-between">
+                    Wallet Address
+                    <span class="delete-text" onclick="deleteWallet('${addressClass}')">Delete</span>
+                </label>
+                <input id="wallet-${numberOfNewAddress}" type="text" class="form-control custom" name="wallets[]" placeholder="">
+            </div>
+        </div>
+        `;
+
+        addressContainer.insertAdjacentHTML('beforeend', newAddress);
+    }
+
+    function deleteWallet(addressClassToDelete) {
+        let addressContainer = document.querySelector('.address-container');
+        let addressToDelete = document.querySelector(`.${addressClassToDelete}`);
+        addressContainer.removeChild(addressToDelete);
+    }
+
+    let thirdStepForm = document.getElementById('thirdStepForm');
+    thirdStepForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let validate = validateThirdStepForm();
+        if (!validate.success) {
+            return Swal.fire({
+                width: 300,
+                position: 'bottom-end',
+                icon: 'error',
+                title: 'Oops...',
+                text: validate.errors[0].message
+            })
+        }
+
+        thirdStepForm.submit();
+    });
+
+    function validateThirdStepForm() {
+        let errors = [];
+
+
+
+        if (errors.length > 0) {
+            return {
+                success: false,
+                errors: errors
+            };
+        }
+
+        return {
+            success: true,
+            message: ''
+        }
+    }
+
+</script>

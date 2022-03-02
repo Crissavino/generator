@@ -6,7 +6,7 @@ const {
 } = require('../controllers/ipfsController');
 const {
     seeUserArea,
-    seeUserCollection,
+    seeUserCollection, seeSmartContractCreate, saveSmartContract,
 } = require('../controllers/userController');
 
 
@@ -30,9 +30,14 @@ router.post(
     uploadCollectionMetadataToIpfs
 );
 
-// router.post(
-//     '/nft-creation/post-layers-folder',
-//     postLayersFolder
-// );
+router.get(
+    '/user/smart-contract/create',
+    seeSmartContractCreate
+);
+
+router.post(
+    '/user/smart-contract/save',
+    saveSmartContract
+);
 
 module.exports = router;

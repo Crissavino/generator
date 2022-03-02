@@ -98,6 +98,7 @@ input[type=number] {
 
 label {
     text-align: left;
+    font-size: 14px;
 }
 
 .form-control::placeholder {
@@ -114,7 +115,7 @@ label {
 }
 
 .form-control.custom {
-    padding: 10px 20px;
+    padding: 10px 16px;
     background-color: #FFFFFF;
     box-shadow: 4px 4px 7px #c6d0ff;
     border: 2px solid;
@@ -155,6 +156,8 @@ textarea#csvTextarea::placeholder {
     padding-top: 100px !important;
     /*padding-bottom: 0 !important;*/
     min-height: 100vh !important;
+    display: flex;
+    align-items: center;
 }
 
 .uploader-background {
@@ -201,7 +204,7 @@ textarea#csvTextarea::placeholder {
 }
 
 .text-muted {
-    font-size: 10px;
+    font-size: 8px;
 }
 
 .btn-blockchain-toggle {
@@ -587,7 +590,29 @@ textarea#csvTextarea::placeholder {
     box-shadow: 4px 4px 7px #e1e3ec;
     border: 2px solid;
     padding: 10px;
+    min-height: 300px;
 }
+
+.nft-collection-container {
+}
+
+.create-another-collection-container {
+}
+
+.create-smart-contract-container {
+    cursor: pointer;
+}
+
+.create-smart-contract-container img {
+    transition: transform 0.5s;
+}
+
+.create-smart-contract-container:hover img {
+    transform: scale(1.1);
+    transition: transform 0.5s;
+}
+
+
 
 .collection-item-image {
     box-shadow: 2px 2px 10px #e1e3ec;
@@ -619,4 +644,10 @@ textarea#csvTextarea::placeholder {
     top: 60px;
     right: 30px;
     cursor: pointer;
+}
+
+@media (max-width: 992px) {
+    .nft-card-2 {
+        min-height: 370px;
+    }
 }

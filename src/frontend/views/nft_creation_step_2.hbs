@@ -154,14 +154,14 @@
     secondStepForm.addEventListener('submit', function (e) {
         // if imagesToGenerate are more than 10000, show warning
         let imagesToGenerate = document.getElementById('imagesToGenerate').value;
-        if (isBiggerThan(10000, imagesToGenerate)) {
+        if (isBiggerThan(20, imagesToGenerate)) {
             e.preventDefault();
             Swal.fire({
                 width: 300,
                 position: 'bottom-end',
                 icon: 'warning',
                 title: 'Warning!',
-                text: 'You are trying to generate more than 10000 images.',
+                text: "You can't generate more than 20 images",
             });
         } else if (isLessThan(10, imagesToGenerate)) {
             e.preventDefault();

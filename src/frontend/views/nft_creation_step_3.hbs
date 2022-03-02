@@ -37,7 +37,7 @@
                     </div>
                 </div>
 
-                <div class="col-10 col-lg-6 mt-3">
+                <div class="col-10 col-lg-6 mt-3 mx-auto">
                     <label for="collectionSymbol">What is the symbol for this collection?</label>
                     <div class="mx-auto mt-3">
                         <input id="collectionSymbol" type="text" class="form-control custom" name="collectionSymbol">
@@ -58,8 +58,8 @@
                     </div>
                 </div>
 
-                <div class="col-12 mt-3 mx-auto">
-                    <p class="mb-0">How should the royalties be split?</p>
+                <div class="col-10 col-lg-12 mt-3 mx-auto">
+                    <label>How should the royalties be split?</label>
                     <span class="text-muted">
                         For secondary sales, the royalties are distributed to each creator, as determined below.
                         Percentages should add up to 100%.
@@ -67,7 +67,7 @@
                     <div class="row">
                         <div class="address-container">
                             <div class="row justify-content-start address-1">
-                                <div class="col-6 text-left">
+                                <div class="col-12 col-sm-10 col-lg-6 text-left">
                                     <label for="wallet-1" class="text-muted my-2">Wallet Address</label>
                                     <input id="wallet-1" type="text" class="form-control custom" name="wallet-1" placeholder="">
                                 </div>
@@ -113,7 +113,7 @@
         let addressClass = `address-${numberOfNewAddress}`;
         let newAddress = `
         <div class="row justify-content-start ${addressClass}">
-            <div class="col-6 text-left">
+            <div class="col-12 col-sm-10 col-lg-6 text-left">
                 <label for="wallet-${numberOfNewAddress}" class="text-muted my-2 d-flex justify-content-between">
                     Wallet Address
                     <span class="delete-text" onclick="deleteWallet('${addressClass}')">Delete</span>
