@@ -39,6 +39,14 @@ input::-webkit-inner-spin-button {
 }
 
 /* the animations */
+
+/* METAMASK LOGO */
+#logo-container svg {
+    width: 30px;
+    height: auto;
+}
+/* METAMASK LOGO */
+
 /* fade */
 .tooltip-custom.fade:after,
 .tooltip-custom.fade:before {
@@ -253,6 +261,38 @@ textarea#csvTextarea::placeholder {
 .theme-btn.next-button {
     box-shadow: 4px 4px 10px #29de8c80;
     padding: 9px 18px;
+}
+
+.payment-modal {
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1;
+}
+
+.payment-form {
+    background-color: #FFFFFF;
+    box-shadow: 4px 4px 7px #262628;
+    border: 2px solid;
+    padding: 10px;
+}
+
+.theme-btn.payment-button {
+    background-image: linear-gradient(to right, #ffcdcd 0%, #ffffff 50%, #ffcdcd 100%);
+    box-shadow: 4px 4px 10px rgba(255, 0, 0, 0.32);
+    padding: 9px;
+    display: flex;
+    justify-content: center;
+    color: #1a1818;
+}
+
+.theme-btn.payment-button .logo-container {
+    margin-right: 10px;
 }
 
 .theme-btn.back-button {
