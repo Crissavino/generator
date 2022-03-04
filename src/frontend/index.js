@@ -7,6 +7,7 @@ const exphbs = require('express-handlebars');
 const path = require('path');
 const basePath = process.cwd();
 const publicPathForLayers = basePath + '/public';
+const reactFrontendApp = basePath + '/frontend';
 
 require('dotenv').config()
 
@@ -54,25 +55,13 @@ app.use(require('./routes/user'));
 // public files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(publicPathForLayers));
+app.use(express.static(reactFrontendApp));
+app.use(express.static(path.join(reactFrontendApp, 'build')));
 
 // DB config
 const { dbConnection } = require("../database/config");
 const fs = require("fs");
 dbConnection();
-
-// minting app route
-app.get('/react', function (req,res) {
-    const userUuid = 'tdgis7';
-    // get the index.html file example // TODO create a folder with the react app
-    const indexFilePath = `${publicPathForLayers}/layers/${userUuid}/react/index.html`;
-    let indexHtmlFile = fs.readFileSync(indexFilePath, 'utf8');
-    indexHtmlFile = indexHtmlFile.replaceAll("USER_UUID", userUuid);
-    fs.writeFileSync(indexFilePath, indexHtmlFile);
-    console.log(`${publicPathForLayers}/layers/${userUuid}/react/index.html`);
-    app.use(express.static(path.join(__dirname, 'views/react')));
-    res.sendFile(`${publicPathForLayers}/layers/${userUuid}/react/index.html`);
-});
-// minting app route
 
 // starting the server
 app.listen(app.get('port'), () => {

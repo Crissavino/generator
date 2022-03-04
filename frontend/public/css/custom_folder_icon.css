@@ -1,0 +1,116 @@
+/* FOLDER STYLES */
+.folder {
+    position: relative;
+    perspective: 2500px;
+    /*margin: 50px auto 0;*/
+    text-align: center;
+}
+.folder:before {
+    content: "";
+    position: absolute;
+    bottom: 229px;
+    left: 0;
+    right: 0;
+    margin: 0 18em;
+}
+.folder:after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    margin: 0 16em;
+}
+
+.folder .back {
+    width: 120px;
+    height: 84px;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 4px 4px 10px #c1c7e4;
+    position: relative;
+    margin: 0 auto;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#cb8b0f+0,df9e22+21,af6e03+99 */
+    background: #cb8b0f; /* Old browsers */
+    background: -moz-linear-gradient(top,  #cb8b0f 0%, #df9e22 21%, #af6e03 99%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cb8b0f), color-stop(21%,#df9e22), color-stop(99%,#af6e03)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #cb8b0f 0%,#df9e22 21%,#af6e03 99%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #cb8b0f 0%,#df9e22 21%,#af6e03 99%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #cb8b0f 0%,#df9e22 21%,#af6e03 99%); /* IE10+ */
+    background: linear-gradient(to bottom,  #cb8b0f 0%,#df9e22 21%,#af6e03 99%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cb8b0f', endColorstr='#af6e03',GradientType=0 ); /* IE6-9 */
+
+}
+
+.folder .cover {
+    width: 120px;
+    height: 84px;
+    border-radius: 6px 0 6px 6px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    margin: 0 auto;
+
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#fcba2b+0,df9e22+70,cb8b0f+100 */
+    background: #fcba2b; /* Old browsers */
+    background: -moz-linear-gradient(top,  #fcba2b 0%, #df9e22 70%, #cb8b0f 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fcba2b), color-stop(70%,#df9e22), color-stop(100%,#cb8b0f)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #fcba2b 0%,#df9e22 70%,#cb8b0f 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #fcba2b 0%,#df9e22 70%,#cb8b0f 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #fcba2b 0%,#df9e22 70%,#cb8b0f 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #fcba2b 0%,#df9e22 70%,#cb8b0f 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcba2b', endColorstr='#cb8b0f',GradientType=0 ); /* IE6-9 */
+    cursor: pointer;
+}
+.folder .cover:hover {
+    transform-origin: 0 108%;
+    transform: rotateX(0deg);
+    animation: folderUnfold .5s ease 0s forwards;
+}
+.folder .cover:after {
+    position: absolute;
+    content: "";
+    width: 50%;
+    height: 10px;
+    border-radius: 6px 6px 0 0;
+    background: #fcba2b;
+    top: -10px;
+    right: 0;
+    border: 0;
+}
+
+.paper {
+    background: #fff;
+    height: 20px;
+    box-shadow: 0 0 4px 1px rgba(0,0,0,.7);
+    position: absolute;
+    top: 2px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0 auto;
+    width: 100px;
+    opacity: 0;
+}
+
+.cover:hover ~ .paper + .paper {
+    margin-top: 4px;
+    animation: folderPaperJump .5s ease .5s forwards;
+}
+.cover:hover ~ .paper + .paper + .paper {
+    margin-top: 8px;
+    animation: folderPaperJump .25s ease .5s forwards;
+}
+
+@keyframes folderUnfold {
+    0% { transform: rotateX(0deg); }
+    100% { transform: rotateX(-30deg); }
+}
+@keyframes folderPaperJump {
+    0% { transform: translateY(50px); opacity: 0; }
+    25% { transform: translateY(50px); opacity: 1; }
+    75% { transform: translateY(-10px); opacity: 1; }
+    100% { transform: translateY(0px); opacity: 1; }
+}
+/* FOLDER STYLES */

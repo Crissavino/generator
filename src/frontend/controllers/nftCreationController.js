@@ -794,7 +794,8 @@ const saveFifthStep = async (req, res) => {
 
         await startCreation(userUuid, projectId, nftCollectionId);
 
-        return res.redirect('/nft-creation/confirmed');
+        return res.redirect('/react/nft-creation/confirmed');
+        // return res.redirect('/nft-creation/confirmed');
 
     } catch (error) {
         console.error(error);
@@ -1081,6 +1082,19 @@ const updateNftImageInView = async (req, res = response) => {
     }
 }
 
+const test = async (req, res = response) => {
+    try {
+        const reactFrontendApp = basePath + '/frontend';
+        res.sendFile(`${reactFrontendApp}/build/index.html`);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
 module.exports = {
     seeFirstStep,
     postLayersFolder,
@@ -1094,5 +1108,6 @@ module.exports = {
     seeFifthStep,
     saveFifthStep,
     seeCreationConfirmed,
-    updateNftImageInView
+    updateNftImageInView,
+    test
 };
