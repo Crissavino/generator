@@ -21,6 +21,21 @@ const UserSchema = new Schema({
         type: String,
         require: false,
     },
+    nonce: {
+        type: Number,
+        require: false,
+        default: Math.floor(Math.random() * 1000000),
+    },
+    publicAddress: {
+        type: String,
+        require: false,
+    },
+    address: {
+        type: String,
+        required: false,
+        unique: true,
+        sparse: true
+    },
     projects: [
         {
             type: Schema.Types.ObjectId,

@@ -51,20 +51,64 @@ class Header extends Component {
     }
 
     async login() {
+
+
         const web3 = new Web3(window.ethereum);
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        const yourAddress = (await web3.eth.getAccounts())[0];
+        let accounts = (await web3.eth.getAccounts());
+        const yourAddress = accounts[0];
         try {
-            const token = await Web3Token.sign(
-                (msg) => web3.eth.personal.sign(msg, yourAddress, ""),
-                "1d"
-            );
 
-            console.log("TOKEN_CREATED", token);
+            // is address already in backend
+            const user = await fetch(`/api/v1/users/${yourAddress}`, {
+                method: 'get',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.success) {
+                        return data.user;
+                    } else {
+                        return null;
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
 
-            const { address, body } = await Web3Token.verify(token);
 
-            console.log("ADDRESS", address, body);
+
+            if (!user) {
+
+                const token = await Web3Token.sign(
+                    (msg) => web3.eth.personal.sign(msg, yourAddress, ""),
+                    "1d"
+                );
+
+                console.log("TOKEN_CREATED", token);
+
+                const { address, body } = await Web3Token.verify(token);
+
+                // if (address) {
+                //     console.log("TOKEN_VERIFIED", address);
+                //     const response = await fetch(`/api/v1/users/create`, {
+                //         method: "POST",
+                //         headers: {
+                //             "Content-Type": "application/json"
+                //         },
+                //         body: JSON.stringify({
+                //             address: yourAddress,
+                //             token: token
+                //         })
+                //     });
+                //     const user = await response.json();
+                //     console.log("USER_CREATED", user);
+                // }
+
+            }
 
         } catch (e) {
             console.log(e)

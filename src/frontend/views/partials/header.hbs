@@ -2,10 +2,23 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <nav class="navbar navbar-expand-lg">
+                <nav class="navbar custom navbar-expand-lg">
                     <a class="navbar-brand" href="/">
                         NFT CREATOR
                     </a>
+
+                    <div class="d-flex flex-column justify-content-center">
+                        <button
+                                type="submit"
+                                class="btn login-button navbar-brand"
+                                style="background-color: transparent; border: none"
+                                onclick="login()"
+                        >
+                        <div class="logo-container" id="logo-container2"></div>
+                        Login
+                        </button>
+                    </div>
+
                     <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">
@@ -22,3 +35,134 @@
     </div> <!-- container -->
 
 </header>
+
+<script src="/js/metamaskLogo2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    async function login() {
+
+        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        let publicAddress = accounts[0];
+        // let userBalance = await window.ethereum.request({ method: 'eth_getBalance', params: [publicAddress] });
+
+        try {
+
+            // is address already in backend
+            await fetch(`/api/v1/users/${publicAddress}`, {
+                method: 'get',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (data.success) {
+                            return data.user;
+                        } else {
+                            let userUuid = localStorage.getItem('userUuid');
+                            if (!userUuid) {
+                                userUuid = Math.random().toString(36).substring(7);
+                            }
+                            localStorage.setItem('userUuid', userUuid);
+                            // show swal with message You are not registered yet
+                            Swal.fire({
+                                title: 'You are not registered yet',
+                                text: 'Please create your NFT art to login',
+                                type: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: 'Create!'
+                            }).then((result) => {
+                                if (result.value) {
+                                    window.location.href = '/nft-creation/first-step';
+                                }
+                            })
+                            // return handleSignup(publicAddress, userUuid);
+
+                        }
+                    })
+                    .then(handleSignMessage)
+                    .then(handleAuthentication)
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+
+        } catch (e) {
+            console.log(e)
+            console.log(e.code)
+            console.log(e.message)
+
+        }
+
+    }
+
+    let handleSignup = (publicAddress, userUuid) => {
+        console.log('handleSignup')
+        console.log({publicAddress, userUuid})
+        console.log('handleSignup')
+        fetch(`/api/v1/users/create`, {
+            body: JSON.stringify({publicAddress, userUuid}),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'POST'
+        }).then(response => {
+            console.log(response.json())})
+    };
+
+    let handleSignMessage = ({ publicAddress, nonce }) => {
+        console.log('handleSignMessage')
+        console.log({publicAddress, nonce})
+        console.log('handleSignMessage')
+        const msg = `
+        Welcome to NFT Creator!
+        You are signing in with this nonce: ${nonce}
+        this will change after a successful login for
+        security reasons.`;
+
+        return new Promise((resolve, reject) =>
+                window.ethereum.request({ method: 'personal_sign', params: [msg, publicAddress] })
+                        .then(signature => {
+                            console.log({ publicAddress, nonce, signature })
+                            resolve({ publicAddress, nonce, signature })
+                        })
+                        .catch(reject)
+        );
+    };
+
+    let handleAuthentication = ({ publicAddress, nonce, signature }) => {
+        console.log('handleAuthentication')
+        console.log({ publicAddress, nonce, signature })
+        console.log('handleAuthentication')
+        fetch(`/api/v1/users/authenticate`, {
+            body: JSON.stringify({ publicAddress, nonce, signature }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('handleAuthentication response')
+                console.log(data)
+                console.log('handleAuthentication response')
+                if (data.success) {
+                    // connect metamask account
+                    window.ethereum.enable().then(() => {
+                        console.log('metamask connected')
+                        // redirect to dashboard
+                        window.location.href = '/user/area/' + data.user.uuid;
+                    });
+                } else {
+                    console.log(data)
+                }
+            })
+
+    }
+</script>

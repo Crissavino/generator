@@ -45,6 +45,11 @@ input::-webkit-inner-spin-button {
     width: 30px;
     height: auto;
 }
+
+#logo-container2 svg {
+    width: 30px;
+    height: auto;
+}
 /* METAMASK LOGO */
 
 /* fade */
@@ -158,6 +163,14 @@ textarea#csvTextarea::placeholder {
 
 .navbar-brand:hover {
     color: #b2cbfc;
+}
+
+.navbar.custom {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .hero-section {

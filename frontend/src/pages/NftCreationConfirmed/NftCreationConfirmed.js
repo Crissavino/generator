@@ -70,9 +70,6 @@ class NftCreationConfirmed extends Component {
     async componentDidMount() {
         this.attachScripts();
 
-        let paymentModal = document.querySelector('.payment-modal');
-        paymentModal.style.visibility = 'visible';
-
         this.loadNewNftImages();
 
         await this.transaction();
@@ -197,7 +194,6 @@ class NftCreationConfirmed extends Component {
 
             let accounts = [];
             await getAccount();
-            console.log(accounts)
 
             // let paymentModal = document.querySelector('.payment-modal');
             // paymentModal.style.visibility = 'visible';
