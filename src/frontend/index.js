@@ -58,7 +58,6 @@ app.use(require('./routes/authentication'));
 
 // public files
 app.use(express.static(path.join(reactFrontendApp, 'build')));
-app.use(express.static(path.join(reactFrontendApp, 'build/static')));
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(`${publicPathForLayers}`));
 // app.use(express.static(reactFrontendApp));
