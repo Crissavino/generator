@@ -29,7 +29,7 @@ export default function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route path="/react/nft-creation/confirmed" element={<NftCreationConfirmed />} />
+                    <Route path="/nft-creation/confirmed" element={<NftCreationConfirmed />} />
                     <Route path="/react/user/area" element={<UserArea />} />
                 </Route>
             </Routes>

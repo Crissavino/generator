@@ -794,8 +794,8 @@ const saveFifthStep = async (req, res) => {
 
         await startCreation(userUuid, projectId, nftCollectionId);
 
-        return res.redirect('/react/nft-creation/confirmed');
-        // return res.redirect('/nft-creation/confirmed');
+        // return res.redirect('/react/nft-creation/confirmed');
+        return res.redirect('/nft-creation/confirmed');
 
     } catch (error) {
         console.error(error);
@@ -1017,15 +1017,8 @@ async function findCreatorsByNftCollectionId(nftCollectionId) {
 
 const seeCreationConfirmed = async (req, res = response) => {
     try {
-        res.render("nft_creation_confirmed", {
-            userUuid: req.session.userUuid,
-            pageTitle: "Creating layers",
-            currentActive: 6,
-        });
-        setTimeout(() => {
-            req.session.destroy();
-        }, 1000);
-
+        const reactFrontendApp = basePath + '/frontend';
+        res.sendFile(`${reactFrontendApp}/build/index.html`);
     } catch (error) {
         console.error(error);
         return res.status(500).json({
