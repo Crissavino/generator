@@ -57,10 +57,15 @@ app.use(require('./routes/user'));
 app.use(require('./routes/authentication'));
 
 // public files
+// react path
 app.use(express.static(path.join(reactFrontendApp, 'build')));
-// app.use(express.static(path.join(__dirname, 'public')));
+//react path
+// src/public path
+app.use(express.static(path.join(__dirname, 'public')));
+// src/public path
+// /public path
 app.use(express.static(`${publicPathForLayers}`));
-// app.use(express.static(reactFrontendApp));
+// /public path
 
 // DB config
 dbConnection();
