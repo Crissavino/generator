@@ -699,6 +699,29 @@ textarea#csvTextarea::placeholder {
     cursor: pointer;
 }
 
+.profile-dropdown {
+
+}
+
+.profile-dropdown-title {
+    cursor: pointer;
+}
+
+.profile-dropdown-menu {
+    right: 0;
+    left: auto;
+    top: 40px;
+    text-align: center;
+    background-color: #FFFFFF;
+    box-shadow: 4px 4px 7px #1c3fcd;
+    border: 3px solid #65677e;
+}
+
+.profile-dropdown-link {
+    margin-right: 0;
+    color: #0d6efd;
+}
+
 @media (max-width: 992px) {
     .nft-card-2 {
         min-height: 370px;
