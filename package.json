@@ -55,6 +55,7 @@
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
     "redis": "^4.0.3",
+    "req-flash": "^0.0.3",
     "sha1": "^1.1.1",
     "socket.io": "^4.4.1",
     "timeago.js": "^4.0.2"

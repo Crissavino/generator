@@ -8,10 +8,11 @@ const {
     seeUserArea,
     seeUserCollection, seeSmartContractCreate, saveSmartContract, isAlreadyRegistered, login, create, authenticate
 } = require('../controllers/userController');
-
+const authenticateToken = require("../middleware/authenticateToken");
 
 router.get(
     '/user/area/:userUuid',
+    authenticateToken,
     seeUserArea
 );
 
@@ -38,21 +39,6 @@ router.get(
 router.post(
     '/user/smart-contract/save',
     saveSmartContract
-);
-
-router.get(
-    `/api/v1/users/:address`,
-    isAlreadyRegistered
-);
-
-router.post(
-    `/api/v1/users/create`,
-    create
-);
-
-router.post(
-    `/api/v1/users/authenticate`,
-    authenticate
 );
 
 module.exports = router;

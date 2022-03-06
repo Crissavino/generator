@@ -29,12 +29,12 @@ const UserSchema = new Schema({
     publicAddress: {
         type: String,
         require: false,
-    },
-    address: {
-        type: String,
-        required: false,
         unique: true,
         sparse: true
+    },
+    jwToken: {
+        type: String,
+        require: false,
     },
     projects: [
         {

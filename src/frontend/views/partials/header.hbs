@@ -6,18 +6,40 @@
                     <a class="navbar-brand" href="/">
                         NFT CREATOR
                     </a>
+                    {{#isEqual isAuthenticated true}}
+                        <div class="profile-dropdown">
+                            <a class="navbar-brand profile-dropdown-title" onclick="toggleProfileMenu()" id="profileDropdown">
+                               Profile
+                            </a>
+                            <ul class="dropdown-menu profile-dropdown-menu" id="profileDropdownMenu">
+                                <li>
+                                    <a class="navbar-brand profile-dropdown-link" href="/user/area/{{authUser.uuid}}">
+                                        User Area
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="navbar-brand profile-dropdown-link" href="/api/v1/auth/logout/{{authUser.uuid}}">
+                                        Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {{/isEqual}}
 
-                    <div class="d-flex flex-column justify-content-center">
-                        <button
-                                type="submit"
-                                class="btn login-button navbar-brand"
-                                style="background-color: transparent; border: none"
-                                onclick="login()"
-                        >
-                        <div class="logo-container" id="logo-container2"></div>
-                        Login
-                        </button>
-                    </div>
+                    {{#isEqual isAuthenticated false}}
+                        <div class="d-flex flex-column justify-content-center">
+                            <button
+                                    type="submit"
+                                    class="btn login-button navbar-brand"
+                                    style="background-color: transparent; border: none"
+                                    onclick="login()"
+                            >
+                                <div class="logo-container" id="logo-container2"></div>
+                                Login
+                            </button>
+                        </div>
+                        <script src="/js/metamaskLogo2.js"></script>
+                    {{/isEqual}}
 
                     <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -36,22 +58,31 @@
 
 </header>
 
-<script src="/js/metamaskLogo2.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 
-    async function login() {
+    function toggleProfileMenu() {
+        console.log('asdasd')
+        let profileDropdownMenu = document.getElementById('profileDropdownMenu');
+        if (profileDropdownMenu.classList.contains('show')) {
+            profileDropdownMenu.classList.remove('show');
+        } else {
+            profileDropdownMenu.classList.add('show');
+        }
 
-        let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        let publicAddress = accounts[0];
-        // let userBalance = await window.ethereum.request({ method: 'eth_getBalance', params: [publicAddress] });
+    }
+
+    async function login() {
 
         try {
 
+            let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            let publicAddress = accounts[0];
+
             // is address already in backend
-            await fetch(`/api/v1/users/${publicAddress}`, {
+            await fetch(`/api/v1/auth/${publicAddress}`, {
                 method: 'get',
                 headers: {
                     'Content-Type': 'application/json'
@@ -64,11 +95,6 @@
                         if (data.success) {
                             return data.user;
                         } else {
-                            let userUuid = localStorage.getItem('userUuid');
-                            if (!userUuid) {
-                                userUuid = Math.random().toString(36).substring(7);
-                            }
-                            localStorage.setItem('userUuid', userUuid);
                             // show swal with message You are not registered yet
                             Swal.fire({
                                 title: 'You are not registered yet',
@@ -83,12 +109,10 @@
                                     window.location.href = '/nft-creation/first-step';
                                 }
                             })
-                            // return handleSignup(publicAddress, userUuid);
-
                         }
                     })
-                    .then(handleSignMessage)
-                    .then(handleAuthentication)
+                    .then(await handleSignMessage)
+                    .then(await handleAuthentication)
                     .catch(function (error) {
                         console.log(error);
                     });
@@ -102,46 +126,63 @@
 
     }
 
-    let handleSignup = (publicAddress, userUuid) => {
-        console.log('handleSignup')
-        console.log({publicAddress, userUuid})
-        console.log('handleSignup')
-        fetch(`/api/v1/users/create`, {
-            body: JSON.stringify({publicAddress, userUuid}),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            method: 'POST'
-        }).then(response => {
-            console.log(response.json())})
-    };
-
-    let handleSignMessage = ({ publicAddress, nonce }) => {
+    let handleSignMessage = async ({ publicAddress, nonce }) => {
+        if (!publicAddress || !nonce) {
+            return Swal.fire(
+                    'Oops...',
+                    'Something went wrong, please try again!',
+                    'error'
+            ).then(() => {
+                window.location.href = '/';
+            });
+        }
         console.log('handleSignMessage')
         console.log({publicAddress, nonce})
         console.log('handleSignMessage')
         const msg = `
-        Welcome to NFT Creator!
+        Welcome back to NFT Creator!
         You are signing in with this nonce: ${nonce}
         this will change after a successful login for
         security reasons.`;
 
-        return new Promise((resolve, reject) =>
-                window.ethereum.request({ method: 'personal_sign', params: [msg, publicAddress] })
-                        .then(signature => {
-                            console.log({ publicAddress, nonce, signature })
-                            resolve({ publicAddress, nonce, signature })
-                        })
-                        .catch(reject)
-        );
+        return await window.ethereum.request({ method: 'personal_sign', params: [msg, publicAddress] })
+                .then(signature => {
+                    console.log({ publicAddress, nonce, signature })
+                    return { publicAddress, nonce, signature, msg };
+                })
+                .catch(error => {
+                    console.log(error);
+                    return {
+                        success: false
+                    };
+                });
+
+        // return new Promise((resolve, reject) =>
+        //         window.ethereum.request({ method: 'personal_sign', params: [msg, publicAddress] })
+        //                 .then(signature => {
+        //                     console.log({ publicAddress, nonce, signature })
+        //                     resolve({ publicAddress, nonce, signature })
+        //                 })
+        //                 .catch(reject)
+        // );
     };
 
-    let handleAuthentication = ({ publicAddress, nonce, signature }) => {
+    let handleAuthentication = async ({ publicAddress, nonce, signature, msg }) => {
+        if (!publicAddress || !nonce || !signature || !msg) {
+            return Swal.fire(
+                    'Oops...',
+                    'Something went wrong, please try again!',
+                    'error'
+            ).then(() => {
+                window.location.href = '/';
+            });
+        }
         console.log('handleAuthentication')
         console.log({ publicAddress, nonce, signature })
         console.log('handleAuthentication')
-        fetch(`/api/v1/users/authenticate`, {
-            body: JSON.stringify({ publicAddress, nonce, signature }),
+        const isLogin = true;
+        await fetch(`/api/v1/auth/authenticate`, {
+            body: JSON.stringify({ publicAddress, nonce, signature, isLogin, msg }),
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -156,11 +197,22 @@
                     // connect metamask account
                     window.ethereum.enable().then(() => {
                         console.log('metamask connected')
-                        // redirect to dashboard
-                        window.location.href = '/user/area/' + data.user.uuid;
-                    });
+                        window.location.href = `/user/area/${data.user.uuid}`
+                    })
                 } else {
-                    console.log(data)
+                    Swal.fire({
+                        title: 'Authentication failed',
+                        text: 'Please try again',
+                        type: 'error',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Try again!'
+                    }).then((result) => {
+                        if (result.value) {
+                            window.location.reload();
+                        }
+                    })
                 }
             })
 

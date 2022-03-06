@@ -2,6 +2,7 @@ import React, {Component, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import styles from './NftCreationConfirmed.module.css';
 import Swal from 'sweetalert2'
+import Web3 from "web3";
 
 class NftCreationConfirmed extends Component {
 
@@ -52,7 +53,11 @@ class NftCreationConfirmed extends Component {
                                         <span className="text-muted">Because we need to eat</span>
                                     </div>
                                     <div className="d-flex flex-column justify-content-center">
-                                        <button type="submit" className="btn btn-lg theme-btn payment-button">
+                                        <button
+                                            type="submit"
+                                            className="btn btn-lg theme-btn payment-button"
+                                            onClick={() => this.pay()}
+                                        >
                                             <div className="logo-container" id="logo-container"></div>
                                             Metamask
                                         </button>
@@ -72,7 +77,8 @@ class NftCreationConfirmed extends Component {
 
         this.loadNewNftImages();
 
-        await this.transaction();
+        // let paymentModal = document.querySelector('.payment-modal');
+        // paymentModal.style.visibility = 'visible';
     }
 
     attachScripts() {
@@ -188,49 +194,237 @@ class NftCreationConfirmed extends Component {
         })
     }
 
-    async transaction() {
-        if (window.ethereum) {
-            const sendEthButton = document.querySelector('.payment-button');
+    async pay() {
+        const userUuid = localStorage.getItem('userUuid');
+        if (!userUuid) {
+            await Swal.fire(
+                'Oops...',
+                'You need to start again, please!',
+                'error'
+            ).then(() => {
+                window.location.href = '/';
+            });
+        }
+        try {
 
-            let accounts = [];
-            await getAccount();
+            await window.ethereum.enable()
+
+            let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            let publicAddress = accounts[0];
+
+            let that = this;
+            // is address already in backend
+            await fetch(`/api/v1/auth/${publicAddress}`, {
+                method: 'get',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(async function (data) {
+                    if(data) {
+                        return await that.handleSignup(publicAddress, userUuid);
+                    } else {
+                        await Swal.fire(
+                            'Oops...',
+                            'You need to start again, please!',
+                            'error'
+                        ).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                })
+                .then(await that.handleSignMessage)
+                .then(await that.handleAuthentication)
+                .then(await that.transaction)
+                .catch(function (error) {
+                    console.log(error);
+                });
+
+        } catch (e) {
+            console.log(e)
+            console.log(e.code)
+            console.log(e.message)
+
+        }
+
+    }
+
+    async handleSignup (publicAddress, userUuid) {
+        if (!publicAddress || !userUuid) {
+            return Swal.fire(
+                'Oops...',
+                'Something went wrong, please try again!',
+                'error'
+            ).then(() => {
+                window.location.reload();
+            });
+        }
+        console.log('handleSignup')
+        console.log({publicAddress, userUuid})
+        console.log('handleSignup')
+        return await fetch(`/api/v1/auth/create`, {
+            body: JSON.stringify({publicAddress, userUuid}),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'POST'
+        }).then( response => response.json())
+            .then(async function (data) {
+                console.log({data})
+                if(await data) {
+                    return {
+                        publicAddress: data.user.publicAddress,
+                        nonce: data.user.nonce
+                    };
+                } else {
+                    await Swal.fire(
+                        'Oops...',
+                        'You need to start again, please!',
+                        'error'
+                    ).then(() => {
+                        window.location.reload();
+                    });
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                return {
+                    success: false
+                };
+            });
+    };
+
+    async handleSignMessage({ publicAddress, nonce }) {
+        if (!publicAddress || !nonce) {
+            return Swal.fire(
+                'Oops...',
+                'Something went wrong, please try again!',
+                'error'
+            ).then(() => {
+                window.location.href = '/';
+            });
+        }
+        console.log('handleSignMessage')
+        console.log({publicAddress, nonce})
+        console.log('handleSignMessage')
+        const msg = `
+        Welcome to NFT Creator!
+        You are signing in with this nonce: ${nonce}
+        this will change after a successful login for
+        security reasons.`;
+
+        return await window.ethereum.request({ method: 'personal_sign', params: [msg, publicAddress] })
+            .then(signature => {
+                console.log({ publicAddress, nonce, signature })
+                return { publicAddress, nonce, signature, msg };
+            })
+            .catch(error => {
+                console.log(error);
+                return {
+                    success: false
+                };
+            });
+    };
+
+    async handleAuthentication({ publicAddress, nonce, signature, msg }) {
+        if (!publicAddress || !nonce || !signature || !msg) {
+            return Swal.fire(
+                'Oops...',
+                'Something went wrong, please try again!',
+                'error'
+            ).then(() => {
+                window.location.reload();
+            });
+        }
+        console.log('handleAuthentication')
+        console.log({ publicAddress, nonce, signature })
+        console.log('handleAuthentication')
+        return await fetch(`/api/v1/auth/authenticate`, {
+            body: JSON.stringify({ publicAddress, nonce, signature, msg }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(async (data) => {
+                console.log('handleAuthentication response')
+                console.log(data)
+                console.log('handleAuthentication response')
+                if (data.success) {
+                    return {
+                        publicAddress,
+                        userUuid: data.user.uuid
+                    }
+                } else {
+                    console.log(data)
+                }
+            })
+
+    }
+
+    async transaction({publicAddress, userUuid}) {
+        if (!publicAddress || !userUuid) {
+            return Swal.fire(
+                'Oops...',
+                'Something went wrong, please try again!',
+                'error'
+            ).then(() => {
+                window.location.reload();
+            });
+        }
+        console.log('transaction')
+        console.log({publicAddress, userUuid})
+        if (!publicAddress || !userUuid) {
+            return Swal.fire(
+                'Oops...',
+                'You need to start again, please!',
+                'error'
+            ).then(() => {
+                window.location.href = '/';
+            });
+        }
+        console.log('transaction')
+        if (window.ethereum) {
 
             // let paymentModal = document.querySelector('.payment-modal');
             // paymentModal.style.visibility = 'visible';
 
             //Sending Ethereum to an address
-            sendEthButton.addEventListener('click', async () => {
-                await getAccount();
-                // let dollarPrice = 1;
-                // // convert to wei
-                // let amount = window.ethereum.utils.toWei(String(dollarPrice), 'ether');
-                // console.log(amount)
-                // // send transaction
+            let amount = Web3.utils.toWei('0.00002', 'ether');
+            console.log(amount)
+            // // send transaction
 
+            // calculate gas price
+            let gasPrice = await window.ethereum.request({ method: 'eth_gasPrice' });
 
-                window.ethereum
-                    .request({
-                        method: 'eth_sendTransaction',
-                        params: [
-                            {
-                                from: accounts[0],
-                                to: '0x2479c5E000b275FA758882c973b565823b2eaeC4',
-                                value: '0x29a2241af62c0000',
-                                // gasPrice: '0x09184e72a000',
-                                gas: '0x2710',
-                            },
-                        ],
-                    })
-                    .then((txHash) => console.log(txHash))
-                    .catch((error) => console.error);
+            console.log('gas price')
+            console.log({gasPrice})
+            console.log('gas price')
 
-                localStorage.removeItem('userUuid');
-
-            });
-
-            async function getAccount() {
-                accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            }
+            window.ethereum
+                .request({
+                    method: 'eth_sendTransaction',
+                    params: [
+                        {
+                            from: publicAddress,
+                            to: '0x2479c5E000b275FA758882c973b565823b2eaeC4',
+                            value: `0x${amount}`,
+                            gasPrice: '0x09184e72a000',
+                            gas: '0x5208'
+                        },
+                    ],
+                })
+                .then((txHash) => {
+                    console.log('txHash')
+                    console.log(txHash)
+                    console.log('txHash')
+                    window.location.href = '/user/area/' + userUuid;
+                })
+                .catch((error) => console.error);
         } else {
             Swal.fire({
                 title: 'Please install MetaMask',

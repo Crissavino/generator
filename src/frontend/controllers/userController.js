@@ -6,14 +6,8 @@ const Project = require('../../models/Project');
 const SmartContract = require('../../models/SmartContract');
 const WhiteList = require('../../models/WhiteList');
 const fs = require("fs");
-const {spawn, exec} = require("child_process");
-const SplitRoyalty = require("../../models/SplitRoyalty");
+const {spawn} = require("child_process");
 const basePath = process.cwd();
-const publicPath = basePath + '/public';
-const publicLayersPath = basePath + '/public/layers';
-const ethUtil = require('ethereumjs-util');
-const sigUtil = require('@metamask/eth-sig-util');
-const jwt = require('jsonwebtoken');
 
 const seeUserArea = async (req, res = response) => {
     const userUuid = req.params.userUuid ?? '309oet';
@@ -507,166 +501,9 @@ const saveSmartContract = async (req, res = response) => {
     }
 }
 
-const isAlreadyRegistered = async (req, res = response) => {
-    // get the address from the request parameters
-    const address = req.params.address
-    try {
-
-        const user = await User.findOne({ publicAddress: address }).exec();
-        if (user) {
-            return res.status(200).json({
-                success: true,
-                user: user,
-                message: "User already registered",
-            });
-        } else {
-            return res.status(200).json({
-                success: false,
-                message: "User not registered",
-            });
-        }
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-}
-
-const login = async (req, res = response) => {
-    // get the address from the request parameters
-    const address = req.params.address
-    try {
-
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-}
-
-async function findUserByUUid(userUuid) {
-    return await User.findOne({
-        uuid: userUuid
-    }).exec() ?? null;
-}
-
-const create = async (req, res = response) => {
-    // get the address from the request parameters
-    const address = req.body.publicAddress
-    const userUuid = req.body.userUuid
-    try {
-        let user = await findUserByUUid(userUuid)
-        if (!user) {
-            let user = new User({
-                uuid: userUuid,
-                publicAddress: address,
-            });
-
-            await User.create(user, (err, user) => {
-                if (err) {
-                    console.log(err);
-                    return res.status(500).json({
-                        success: false,
-                        message: "Server error",
-                    });
-                }
-
-                return res.status(200).json({
-                    success: true,
-                    user: user,
-                    message: "User created",
-                });
-            });
-        } else {
-            user.publicAddress = address;
-            await user.save();
-            return res.status(200).json({
-                success: true,
-                user: user,
-                message: "User updated",
-            });
-        }
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-}
-
-const authenticate = async (req, res = response) => {
-    // get the address from the request parameters
-    const publicAddress = req.body.publicAddress
-    const nonce = req.body.nonce
-    const signature = req.body.signature
-    try {
-        const msg = `
-        Welcome to NFT Creator!
-        You are signing in with this nonce: ${nonce}
-        this will change after a successful login for
-        security reasons.`;
-
-        const msgBuffer = ethUtil.toBuffer('0x'+Buffer.from(msg).toString('hex'));
-        const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
-        const signatureBuffer = ethUtil.toBuffer(signature);
-        const signatureParams = ethUtil.fromRpcSig(signatureBuffer);
-        const publicKey = ethUtil.ecrecover(
-            msgHash,
-            signatureParams.v,
-            signatureParams.r,
-            signatureParams.s
-        );
-        const addressBuffer = ethUtil.publicToAddress(publicKey);
-        const address = ethUtil.bufferToHex(addressBuffer);
-
-        // The signature verification is successful if the address found with
-        // sigUtil.recoverPersonalSignature matches the initial publicAddress
-        if (address.toLowerCase() === publicAddress.toLowerCase()) {
-            const user = await User.findOne({ publicAddress: address }).exec();
-            if (user) {
-                // chance nonce value of user for security reasons
-                user.nonce = Math.floor(Math.random() * 1000000);
-                await user.save();
-                return res.status(200).json({
-                    success: true,
-                    user: user,
-                    message: "User authenticated",
-                });
-            } else {
-                return res.status(200).json({
-                    success: false,
-                    message: "User not registered",
-                });
-            }
-        } else {
-            return res
-                .status(401)
-                .send({ error: 'Signature verification failed' });
-        }
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-}
-
 module.exports = {
     seeUserArea,
     seeUserCollection,
     seeSmartContractCreate,
     saveSmartContract,
-    isAlreadyRegistered,
-    login,
-    create,
-    authenticate
 };
