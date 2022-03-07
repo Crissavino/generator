@@ -1,3 +1,6 @@
+html {
+    overflow-x: hidden !important;
+}
 /* HIDE ARROW ON INPUTS TYPE NUMBER */
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
