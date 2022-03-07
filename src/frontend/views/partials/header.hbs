@@ -96,10 +96,10 @@
                             return data.user;
                         } else {
                             // show swal with message You are not registered yet
-                            Swal.fire({
+                            return Swal.fire({
                                 title: 'You are not registered yet',
                                 text: 'Please create your NFT art to login or maybe you registered with another account',
-                                type: 'warning',
+                                icon: 'warning',
                                 showCancelButton: true,
                                 confirmButtonColor: '#3085d6',
                                 cancelButtonColor: '#d33',
