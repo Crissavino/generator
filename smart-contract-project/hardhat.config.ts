@@ -207,6 +207,8 @@ if (process.env.NETWORK_POLYGON_MUMBAI_URL !== undefined) {
     chainId: 80001,
     url: process.env.NETWORK_POLYGON_MUMBAI_URL,
     accounts: [process.env.NETWORK_POLYGON_MUMBAI_PRIVATE_KEY!],
+    gas: 23000000000,
+    gasMultiplier: 1.1,
   };
 }
 

@@ -138,9 +138,8 @@ const postLayersFolder = async (req, res = response) => {
                 });
             }
 
-            let session = req.session;
-            let userUuid = req.body.userUuid;
-            session.userUuid = userUuid;
+            const userUuid = req.body.userUuid;
+            req.session.userUuid = userUuid;
             // TODO see real case
             let user = await findUserByUUid(userUuid)
             if (!user) {
@@ -241,7 +240,6 @@ const seeSecondStep = async (req, res = response) => {
             message: "Server error",
         });
     }
-
 }
 
 const replaceLayersFolder = async (req, res = response) => {

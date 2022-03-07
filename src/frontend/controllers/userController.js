@@ -488,7 +488,7 @@ const saveSmartContract = async (req, res = response) => {
                 }
 
                 // TODO we are creating the smart contract could take a while
-                return res.redirect('/user/area');
+                return res.redirect(`/user/area/${user.uuid}`);
             });
         });
 
