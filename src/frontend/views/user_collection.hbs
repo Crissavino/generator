@@ -1,22 +1,16 @@
 <section id="home" class="hero-section">
     <div class="container">
         <div class="col-12 col-lg-10 p-3 mx-auto text-center big-white-modal d-flex flex-column justify-content-center align-items-center">
-            <h2>This is your collection: {{ nftCollection.name }}</h2>
+            <h2>{{ nftCollection.name }}</h2>
             <h5>{{ nftCollection.symbol }}</h5>
-            <p>
-                {{ nftCollection.description }}
-            </p>
 
             <div class="row justify-content-start">
-                <div class="col-6">
-                    <p> IPFS images folder hash: {{ nftCollection.ipfsImagesFolderHash }}</p>
-                    <a href="https://ipfs.io/ipfs/{{ nftCollection.ipfsImagesFolderHash }}" class="btn btn-primary" target="_blank">View</a>
-                </div>
-                <div class="col-6">
-                    <p> IPFS metadata folder hash: {{ nftCollection.ipfsMetadataFolderHash }}</p>
-                    <a href="https://ipfs.io/ipfs/{{ nftCollection.ipfsMetadataFolderHash }}" class="btn btn-primary" target="_blank">View</a>
-                </div>
-
+                <a href="https://ipfs.io/ipfs/{{ nftCollection.ipfsImagesFolderHash }}" class="btn btn-primary mt-4 mb-2" target="_blank">
+                    See your images folder on IPFS
+                </a>
+                <a href="https://ipfs.io/ipfs/{{ nftCollection.ipfsMetadataFolderHash }}" class="btn btn-primary" target="_blank">
+                    See your metadata folder on IPFS
+                </a>
             </div>
 
             <div class="col-12 d-flex flex-column nft-image-container mx-auto mt-5">
@@ -43,7 +37,7 @@
                                         <a href="https://ipfs.io/ipfs/{{ ipfsImageHash }}" class="btn btn-primary" target="_blank">View</a>
                                     {{/isNotEmpty}}
                                     {{#isEmpty ipfsImageHash}}
-<!--                                        disable the link-->
+                                    <!-- disable the link-->
                                         <button class="btn btn-primary" disabled>View</button>
                                     {{/isEmpty}}
                                 </td>
