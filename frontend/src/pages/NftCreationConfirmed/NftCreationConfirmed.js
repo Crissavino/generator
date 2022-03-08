@@ -207,8 +207,6 @@ class NftCreationConfirmed extends Component {
         }
         try {
 
-            await window.ethereum.enable()
-
             let accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             let publicAddress = accounts[0];
 
@@ -229,7 +227,7 @@ class NftCreationConfirmed extends Component {
                     } else {
                         await Swal.fire(
                             'Oops...',
-                            'You need to start again, please!',
+                            'Something went wrong, please try again!',
                             'error'
                         ).then(() => {
                             window.location.reload();
@@ -262,9 +260,6 @@ class NftCreationConfirmed extends Component {
                 window.location.reload();
             });
         }
-        console.log('handleSignup')
-        console.log({publicAddress, userUuid})
-        console.log('handleSignup')
         return await fetch(`/api/v1/auth/create`, {
             body: JSON.stringify({publicAddress, userUuid}),
             headers: {
@@ -304,12 +299,9 @@ class NftCreationConfirmed extends Component {
                 'Something went wrong, please try again!',
                 'error'
             ).then(() => {
-                window.location.href = '/';
+                window.location.reload();
             });
         }
-        console.log('handleSignMessage')
-        console.log({publicAddress, nonce})
-        console.log('handleSignMessage')
         const msg = `
         Welcome to NFT Creator!
         You are signing in with this nonce: ${nonce}
@@ -323,6 +315,23 @@ class NftCreationConfirmed extends Component {
             })
             .catch(error => {
                 console.log(error);
+                // if the user cancels the sign message request
+                if (error.message === "MetaMask Message Signature: User denied message signature.") {
+                    // ask if he want to change account
+                    return Swal.fire({
+                        title: 'Do you want to change accounts?',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes!'
+                    }).then(async (result) => {
+                        if (!result.value) {
+                            window.location.href = '/';
+                        }
+                    });
+                }
                 return {
                     success: false
                 };
@@ -339,9 +348,6 @@ class NftCreationConfirmed extends Component {
                 window.location.reload();
             });
         }
-        console.log('handleAuthentication')
-        console.log({ publicAddress, nonce, signature })
-        console.log('handleAuthentication')
         return await fetch(`/api/v1/auth/authenticate`, {
             body: JSON.stringify({ publicAddress, nonce, signature, msg }),
             headers: {
@@ -376,18 +382,6 @@ class NftCreationConfirmed extends Component {
                 window.location.reload();
             });
         }
-        console.log('transaction')
-        console.log({publicAddress, userUuid})
-        if (!publicAddress || !userUuid) {
-            return Swal.fire(
-                'Oops...',
-                'You need to start again, please!',
-                'error'
-            ).then(() => {
-                window.location.href = '/';
-            });
-        }
-        console.log('transaction')
         if (window.ethereum) {
 
             // let paymentModal = document.querySelector('.payment-modal');

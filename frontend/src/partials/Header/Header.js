@@ -15,13 +15,13 @@ class Header extends Component {
                                     NFT CREATOR
                                 </a>
 
-                                <button className="navbar-toggler" type="button" data-toggle="collapse"
-                                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                                        aria-expanded="false" aria-label="Toggle navigation">
-                                    <span className="toggler-icon"></span>
-                                    <span className="toggler-icon"></span>
-                                    <span className="toggler-icon"></span>
-                                </button>
+                                {/*<button className="navbar-toggler" type="button" data-toggle="collapse"*/}
+                                {/*        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"*/}
+                                {/*        aria-expanded="false" aria-label="Toggle navigation">*/}
+                                {/*    <span className="toggler-icon"></span>*/}
+                                {/*    <span className="toggler-icon"></span>*/}
+                                {/*    <span className="toggler-icon"></span>*/}
+                                {/*</button>*/}
 
                                 <div className="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
                                 </div>

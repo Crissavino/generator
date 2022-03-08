@@ -64,7 +64,7 @@ const create = async (req, res = response) => {
                 publicAddress: publicAddress,
             });
 
-            await User.create(user, (err, user) => {
+            await User.create(user, (err, newUser) => {
                 if (err) {
                     console.log(err);
                     return res.status(500).json({
@@ -72,6 +72,8 @@ const create = async (req, res = response) => {
                         message: "Server error",
                     });
                 }
+
+                user = newUser;
             });
         }
 
